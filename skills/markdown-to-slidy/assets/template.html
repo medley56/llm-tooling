@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <title>{{TITLE}}</title>
+  <meta name="copyright" content="Copyright &#169; {{YEAR}} {{AUTHOR}}" />
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="http://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="http://www.w3.org/Talks/Tools/Slidy2/styles/w3c-blue.css" />
+  <script src="http://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js"
+   charset="utf-8" type="text/javascript"></script>
+  <style type="text/css">
+    /* Assertion-Evidence slide layout */
+    .slide h1 {
+      font-size: 130%;
+      line-height: 1.3;
+      margin-bottom: 0.5em;
+    }
+    .evidence {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 55%;
+      padding: 1em;
+    }
+    .evidence table {
+      border-collapse: collapse;
+      margin: 0 auto;
+    }
+    .evidence table th,
+    .evidence table td {
+      border: 1px solid #666;
+      padding: 0.4em 0.8em;
+      text-align: left;
+    }
+    .evidence table th {
+      background: #336;
+      color: #fff;
+    }
+    .evidence pre {
+      font-size: 85%;
+      background: #f5f5f5;
+      border: 1px solid #ccc;
+      padding: 0.8em;
+      overflow-x: auto;
+      max-width: 90%;
+    }
+    .evidence .key-point {
+      font-size: 150%;
+      font-weight: bold;
+      color: #336;
+      text-align: center;
+    }
+    .evidence .columns {
+      display: flex;
+      gap: 2em;
+      width: 100%;
+      justify-content: center;
+    }
+    .evidence .columns .col {
+      flex: 1;
+      max-width: 45%;
+    }
+    .placeholder {
+      border: 2px dashed #999;
+      background: #f0f0f0;
+      padding: 2em;
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="background">
+  <img id="head-icon" alt="graphic with four colored squares"
+    src="http://www.w3.org/Talks/Tools/Slidy2/graphics/icon-blue.png" />
+</div>
+
+<!-- TITLE SLIDE -->
+<div class="slide cover">
+  <h1>{{TITLE}}</h1>
+  <p>{{AUTHOR}}</p>
+  <p>{{DATE}}</p>
+</div>
+
+<!-- CONTENT SLIDES GO HERE -->
+
+<!-- Example: assertion headline with visual evidence -->
+<!--
+<div class="slide">
+  <h1>Assertion headline: a complete sentence stating the slide's key point</h1>
+  <div class="evidence">
+    <table>
+      <tr><th>Metric</th><th>Before</th><th>After</th></tr>
+      <tr><td>Throughput</td><td>1,000 req/s</td><td>3,200 req/s</td></tr>
+    </table>
+  </div>
+</div>
+-->
+
+<!-- Example: assertion headline with visualization placeholder -->
+<!--
+<div class="slide">
+  <h1>The new architecture decouples producers from consumers via a message queue</h1>
+  <div class="evidence">
+    <div class="placeholder" data-viz-type="diagram" data-viz-description="System architecture showing three microservices connected via message queue">
+      [PLACEHOLDER: System architecture diagram — three microservices connected via message queue]
+    </div>
+  </div>
+</div>
+-->
+
+<!-- Example: assertion headline with key number -->
+<!--
+<div class="slide">
+  <h1>Migration reduced average response latency by 65%</h1>
+  <div class="evidence">
+    <div class="key-point">340ms → 120ms</div>
+  </div>
+</div>
+-->
+
+</body>
+</html>
