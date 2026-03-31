@@ -1,0 +1,39 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/debian
+{
+	"name": "LLM Tooling",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "mcr.microsoft.com/devcontainers/base:trixie",
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.live-server",
+				"github.copilot-chat",
+				"anthropic.claude-code",
+				"dnut.rewrap-revived"
+			],
+			"settings": {
+				"chat.mcp.gallery.enabled": true,
+				"chat.mcp.autostart": "newAndOutdated",
+				"dev.containers.copyGitConfig": true,
+				"[markdown]": {
+					"editor.rulers": [
+						120
+					]
+				},
+				"editor.formatOnSave": true
+			},
+			"workbench.trustedDomains": [
+				"https://claude.ai"
+			]
+		}
+	},
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+	"postAttachCommand": "./.devcontainer/setup.sh"
+}
