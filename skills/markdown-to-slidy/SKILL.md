@@ -61,9 +61,9 @@ Review the approved outline and identify any slides where a visual (diagram, cha
 > - **Slide 4:** A diagram showing the three microservices and their message queue connections
 > - **Slide 7:** A chart comparing latency before and after migration
 >
-> For each, I can add a clearly marked placeholder that you can replace with an actual image later. Which (if any) would you like me to include?
+> For each, I can add a clearly marked placeholder that you can replace with an actual image later or I can generate an SVG visualization based on your description. Which (if any) would you like me to include? If you want me to generate an SVG, please provide a detailed description of the visual you have in mind for each slide.
 
-If no slides need visualizations, skip this step entirely. Do not suggest visualizations unless they are genuinely necessary.
+If no slides need visualizations, skip this step entirely. Do not suggest visualizations unless they would genuinely improve communication of the content.
 
 ### Step 4: Generate HTML
 
@@ -103,7 +103,7 @@ The area below the headline provides visual evidence supporting the assertion. P
 2. **Table** — for comparisons, before/after data, feature matrices
 3. **Code snippet** — for technical presentations (max 15 lines per slide)
 4. **Column layout** — two or three short items side by side (use the `columns` class)
-5. **Visualization placeholder** — only when approved by the user in Step 3
+5. **Visualization (or placeholder)** — only when approved by the user in Step 3
 
 ### What to Avoid
 
@@ -119,6 +119,7 @@ The area below the headline provides visual evidence supporting the assertion. P
 - **Suggest placeholders only when necessary** — architecture diagrams, data charts, process flows, or similar visuals that genuinely cannot be replaced by text.
 - **Always ask the user** before adding any placeholder (Step 3).
 - **Placeholder format:** Use the `placeholder` CSS class with `data-viz-type` (diagram, chart, graph, screenshot, or photo) and `data-viz-description` attributes. The visible text inside should read `[PLACEHOLDER: Human-readable description]`. See `assets/template.html` for the exact markup and styling.
+- **Generate SVG visualizations if specifically requested** - If the user specifically asks for a diagram or chart, I can generate an SVG directly in the HTML or as a separate SVG file that is included in the HTML. Complex visualization should always be generated in separate SVG files to keep the HTML clean and maintainable. The SVG should be well-structured with appropriate use of groups, classes, and IDs for styling and potential interactivity.
 
 ## Content Transformation Rules
 
