@@ -111,7 +111,7 @@ CRITICAL: Wait for the user's approval or adjustments before proceeding to Step 
 2. Replace `{{TITLE}}`, `{{AUTHOR}}`, `{{DATE}}`, and `{{THEME}}` placeholders
 3. Generate a `<section>` element for each approved slide using the appropriate CSS class and HTML pattern (see Slide Type Reference below)
 4. Add `class="fragment"` for incremental reveals where appropriate (see Fragment Rules)
-5. Add `<aside class="notes">` for speaker notes where the source material has prose worth preserving as talking points
+5. Include `<aside class="notes"></aside>` on every slide — populate with talking points from the source material's prose, or leave empty if no notes are needed
 6. Write the complete HTML file to the output path
 
 ### Step 4: Summarize
@@ -133,6 +133,7 @@ Map each slide-type tag to its HTML pattern:
   <h1>Presentation Title</h1>
   <p>Author Name</p>
   <p>Date</p>
+  <aside class="notes"></aside>
 </section>
 ```
 
@@ -140,6 +141,7 @@ Map each slide-type tag to its HTML pattern:
 ```html
 <section class="slide-section">
   <h2>Section Name</h2>
+  <aside class="notes"></aside>
 </section>
 ```
 
@@ -152,6 +154,7 @@ The `<h2>` is optional — include it when a short topic label helps orient the 
   <div class="evidence">
     <!-- table, key-point, columns, or other evidence here -->
   </div>
+  <aside class="notes"></aside>
 </section>
 ```
 
@@ -162,6 +165,7 @@ The `<h2>` is optional — include it when a short topic label helps orient the 
   <div class="evidence">
     <!-- definition, diagram, key attributes, or brief explanation here -->
   </div>
+  <aside class="notes"></aside>
 </section>
 ```
 
@@ -173,6 +177,7 @@ The `<h2>` is optional — include it when a short topic label helps orient the 
     3.2x
     <span class="label">throughput improvement</span>
   </div>
+  <aside class="notes"></aside>
 </section>
 ```
 
@@ -190,6 +195,7 @@ The `<h2>` is optional — include it when a short topic label helps orient the 
       <p>Details...</p>
     </div>
   </div>
+  <aside class="notes"></aside>
 </section>
 ```
 
@@ -200,6 +206,7 @@ The `<h2>` is optional — include it when a short topic label helps orient the 
     The quote text goes here.
     <div class="attribution">— Attribution</div>
   </blockquote>
+  <aside class="notes"></aside>
 </section>
 ```
 
@@ -211,6 +218,7 @@ The `<h2>` is optional — include it when a short topic label helps orient the 
 def example():
     return "hello"
   </code></pre>
+  <aside class="notes"></aside>
 </section>
 ```
 
@@ -218,6 +226,7 @@ def example():
 ```html
 <section class="slide-image" data-background-image="path/to/image.png" data-background-size="contain">
   <h2>Assertion about what the image shows</h2>
+  <aside class="notes"></aside>
 </section>
 ```
 
@@ -228,6 +237,17 @@ def example():
   <div class="placeholder" data-viz-type="diagram" data-viz-description="Description">
     [PLACEHOLDER: Human-readable description]
   </div>
+  <aside class="notes"></aside>
+</section>
+```
+
+### [image] with inline image
+When using an inline `<img>` element instead of a placeholder or background image, add `class="r-stretch"` to the `<img>` tag so reveal.js automatically sizes it to fill available slide space. This also ensures correct sizing in print-pdf export mode.
+```html
+<section class="slide-image">
+  <h2>Assertion about what the image shows</h2>
+  <img class="r-stretch" src="path/to/image.svg" alt="Description">
+  <aside class="notes"></aside>
 </section>
 ```
 
@@ -351,6 +371,7 @@ Do not reproduce bullet lists on slides. Transform them:
 - Load plugins: highlight.js (code syntax) and notes (speaker notes)
 - Cap at approximately 20 content slides. If the source material would produce more, suggest splitting into multiple presentations and ask the user which sections to prioritize.
 - Every content slide uses a `<section>` element with the appropriate slide-type class
+- The template includes `pdfSeparateFragments: false` (so fragments don't generate extra PDF pages), `slideNumber: 'c/t'`, and `showSlideNumber: 'all'` for print-pdf compatibility — do not remove these config options
 
 ## Available Themes
 
