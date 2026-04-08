@@ -41,7 +41,7 @@ Ask the user which reveal.js theme they'd like. Present the options:
 
 | Theme | Description |
 |-------|-------------|
-| `white` | Clean and minimal — good for professional and corporate presentations (default) |
+| `white` | Clean and minimal — good for professional and corporate presentations |
 | `black` | Dark background with white text — modern, high contrast |
 | `league` | Dark grey with subtle texture — polished and understated |
 | `beige` | Warm paper-like background — approachable and academic |
@@ -53,7 +53,7 @@ Ask the user which reveal.js theme they'd like. Present the options:
 | `blood` | Dark with red accents — bold and dramatic |
 | `moon` | Dark blue-grey — subtle and calm |
 
-If the user has no preference, default to `white`.
+If the user has no preference, default to `black`.
 
 Assess organization quality:
 - **Well-organized:** Clear structure, logical flow. Proceed to Step 2.
@@ -326,7 +326,7 @@ Do not reproduce bullet lists on slides. Transform them:
 
 ## Available Themes
 
-`white` (default), `black`, `league`, `beige`, `sky`, `night`, `serif`, `simple`, `solarized`, `blood`, `moon`
+`white`, `black` (default), `league`, `beige`, `sky`, `night`, `serif`, `simple`, `solarized`, `blood`, `moon`
 
 These map directly to reveal.js theme CSS files. Use the theme name as the `{{THEME}}` placeholder value.
 
