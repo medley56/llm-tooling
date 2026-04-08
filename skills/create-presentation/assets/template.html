@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{TITLE}}</title>
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js@5/dist/reset.css">
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js@5/dist/reveal.css">
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js@5/dist/theme/{{THEME}}.css">
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js@5/plugin/highlight/monokai.css">
+  <style>
+    /* ── Title slide ── */
+    .slide-title h1 {
+      font-size: 2.2em;
+      margin-bottom: 0.3em;
+    }
+    .slide-title p {
+      font-size: 0.9em;
+      opacity: 0.7;
+    }
+
+    /* ── Section divider ── */
+    .slide-section {
+      background: #2d3436;
+      color: #fff;
+    }
+    .slide-section h2 {
+      font-size: 1.8em;
+      border: none;
+    }
+
+    /* ── Assertion + evidence (core slide type) ── */
+    .slide-assertion h2 {
+      font-size: 1.3em;
+      line-height: 1.3;
+      margin-bottom: 0.5em;
+      text-align: left;
+    }
+    .evidence {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 55%;
+      padding: 1em;
+    }
+    .evidence table {
+      border-collapse: collapse;
+      margin: 0 auto;
+    }
+    .evidence table th,
+    .evidence table td {
+      border: 1px solid #666;
+      padding: 0.4em 0.8em;
+      text-align: left;
+    }
+    .evidence table th {
+      background: #2d3436;
+      color: #fff;
+    }
+    .evidence pre {
+      font-size: 0.75em;
+      width: 100%;
+    }
+
+    /* ── Key metric ── */
+    .slide-metric h2 {
+      font-size: 1.3em;
+      line-height: 1.3;
+      margin-bottom: 0.5em;
+    }
+    .key-point {
+      font-size: 3em;
+      font-weight: bold;
+      color: #2d3436;
+      text-align: center;
+      padding: 0.5em 0;
+    }
+    .key-point .label {
+      display: block;
+      font-size: 0.35em;
+      font-weight: normal;
+      opacity: 0.6;
+      margin-top: 0.3em;
+    }
+
+    /* ── Comparison / columns ── */
+    .slide-comparison h2 {
+      font-size: 1.3em;
+      line-height: 1.3;
+      margin-bottom: 0.5em;
+      text-align: left;
+    }
+    .columns {
+      display: flex;
+      gap: 2em;
+      width: 100%;
+      justify-content: center;
+    }
+    .columns .col {
+      flex: 1;
+      max-width: 45%;
+      text-align: left;
+    }
+    .columns .col h3 {
+      font-size: 1em;
+      margin-bottom: 0.4em;
+    }
+
+    /* ── Quote ── */
+    .slide-quote blockquote {
+      font-size: 1.4em;
+      font-style: italic;
+      border: none;
+      box-shadow: none;
+      padding: 0 1em;
+      max-width: 80%;
+      margin: 0 auto;
+      text-align: left;
+    }
+    .slide-quote .attribution {
+      font-size: 0.5em;
+      font-style: normal;
+      opacity: 0.7;
+      margin-top: 0.8em;
+      text-align: right;
+    }
+
+    /* ── Code slide ── */
+    .slide-code h2 {
+      font-size: 1.1em;
+      line-height: 1.3;
+      margin-bottom: 0.4em;
+      text-align: left;
+    }
+
+    /* ── Image slide ── */
+    .slide-image h2 {
+      font-size: 1.3em;
+      line-height: 1.3;
+    }
+
+    /* ── Placeholder for missing visuals ── */
+    .placeholder {
+      border: 2px dashed #999;
+      background: #f0f0f0;
+      padding: 2em;
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- TITLE SLIDE -->
+      <section class="slide-title">
+        <h1>{{TITLE}}</h1>
+        <p>{{AUTHOR}}</p>
+        <p>{{DATE}}</p>
+      </section>
+
+      <!-- CONTENT SLIDES GO HERE -->
+
+      <!-- Example: section divider -->
+      <!--
+      <section class="slide-section">
+        <h2>Section Name</h2>
+      </section>
+      -->
+
+      <!-- Example: assertion + table evidence -->
+      <!--
+      <section class="slide-assertion">
+        <h2>Response times improved 3x after the migration</h2>
+        <div class="evidence">
+          <table>
+            <tr><th>Metric</th><th>Before</th><th>After</th></tr>
+            <tr><td>Throughput</td><td>1,000 req/s</td><td>3,200 req/s</td></tr>
+            <tr><td>Latency (p99)</td><td>340ms</td><td>120ms</td></tr>
+          </table>
+        </div>
+      </section>
+      -->
+
+      <!-- Example: key metric -->
+      <!--
+      <section class="slide-metric">
+        <h2>Migration reduced average response latency by 65%</h2>
+        <div class="key-point">
+          340ms → 120ms
+          <span class="label">average response latency</span>
+        </div>
+      </section>
+      -->
+
+      <!-- Example: comparison / two-column -->
+      <!--
+      <section class="slide-comparison">
+        <h2>Event-driven architecture trades latency for throughput</h2>
+        <div class="columns">
+          <div class="col">
+            <h3>Request-Driven</h3>
+            <p>Synchronous processing</p>
+            <p>Low latency, limited throughput</p>
+            <p>Tight coupling</p>
+          </div>
+          <div class="col">
+            <h3>Event-Driven</h3>
+            <p>Asynchronous processing</p>
+            <p>Higher latency, massive throughput</p>
+            <p>Loose coupling</p>
+          </div>
+        </div>
+      </section>
+      -->
+
+      <!-- Example: quote -->
+      <!--
+      <section class="slide-quote">
+        <blockquote>
+          The best architecture is the one your team can evolve.
+          <div class="attribution">— Werner Vogels</div>
+        </blockquote>
+      </section>
+      -->
+
+      <!-- Example: code slide -->
+      <!--
+      <section class="slide-code">
+        <h2>The event handler validates and routes in 12 lines</h2>
+        <pre><code data-trim data-noescape class="language-python">
+def handle_event(event: Event) -> None:
+    if not event.is_valid():
+        raise ValidationError(event.errors)
+    router.dispatch(event)
+        </code></pre>
+      </section>
+      -->
+
+      <!-- Example: image slide with background -->
+      <!--
+      <section class="slide-image" data-background-image="path/to/image.png" data-background-size="contain">
+        <h2>Three microservices replaced the monolithic request handler</h2>
+      </section>
+      -->
+
+      <!-- Example: image slide with placeholder -->
+      <!--
+      <section class="slide-image">
+        <h2>Three microservices replaced the monolithic request handler</h2>
+        <div class="placeholder" data-viz-type="diagram" data-viz-description="Architecture diagram showing three microservices connected via message queue">
+          [PLACEHOLDER: Architecture diagram — three microservices connected via message queue]
+        </div>
+      </section>
+      -->
+
+      <!-- Example: slide with fragments (incremental reveal) -->
+      <!--
+      <section class="slide-assertion">
+        <h2>Three factors drove the migration decision</h2>
+        <div class="evidence">
+          <table>
+            <tr><th>Factor</th><th>Impact</th></tr>
+            <tr class="fragment"><td>Throughput ceiling</td><td>10K req/s max</td></tr>
+            <tr class="fragment"><td>Deploy frequency</td><td>Once per week</td></tr>
+            <tr class="fragment"><td>Team coupling</td><td>All teams blocked on shared codebase</td></tr>
+          </table>
+        </div>
+        <aside class="notes">
+          Speaker notes go here. These are visible in speaker view (press S).
+          Use for talking points, data sources, or timing cues.
+        </aside>
+      </section>
+      -->
+
+    </div>
+  </div>
+  <script src="https://unpkg.com/reveal.js@5/dist/reveal.js"></script>
+  <script src="https://unpkg.com/reveal.js@5/plugin/highlight/highlight.js"></script>
+  <script src="https://unpkg.com/reveal.js@5/plugin/notes/notes.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      transition: 'slide',
+      plugins: [RevealHighlight, RevealNotes]
+    });
+  </script>
+</body>
+</html>
