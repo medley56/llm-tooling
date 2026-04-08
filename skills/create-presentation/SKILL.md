@@ -14,7 +14,7 @@ metadata:
 
 # Create Presentation
 
-Create a reveal.js HTML presentation following the Assertion-Evidence slide design methodology. Accepts markdown files, topic descriptions, or rough notes as input.
+Create a reveal.js HTML presentation guided by the Assertion-Evidence slide design methodology. Most content slides should use assertion headlines backed by visual evidence, but some slides may serve other purposes — introducing concepts, defining terms, framing context, or posing questions. Accepts markdown files, topic descriptions, or rough notes as input.
 
 ## Instructions
 
@@ -94,9 +94,10 @@ Available slide-type tags:
 - `[title]` — title or closing slide (centered, large text)
 - `[section]` — section divider (dark background, used between narrative beats)
 - `[assertion]` — standard content slide (assertion headline + evidence)
+- `[concept]` — introduces a term, definition, framework, or idea without making a claim
 - `[metric]` — key number or statistic (assertion headline + large figure)
 - `[comparison]` — two-column side-by-side layout
-- `[code]` — code-focused slide (assertion headline + code block)
+- `[code]` — code-focused slide (assertion headline or descriptive headline + code block)
 - `[quote]` — emphasized quotation with attribution
 - `[image]` — slide with a diagram, chart, or visual (generates placeholder if no image provided)
 
@@ -143,11 +144,23 @@ Map each slide-type tag to its HTML pattern:
 ```
 
 ### [assertion]
+The `<h2>` is optional — include it when a short topic label helps orient the audience; omit it when the assertion sentence alone is sufficient.
 ```html
 <section class="slide-assertion">
-  <h2>Assertion headline: a complete sentence stating the key point</h2>
+  <h2>Optional short topic label</h2>
+  <p class="assertion">A complete sentence stating the slide's key point.</p>
   <div class="evidence">
     <!-- table, key-point, columns, or other evidence here -->
+  </div>
+</section>
+```
+
+### [concept]
+```html
+<section class="slide-concept">
+  <h2>Descriptive headline: a term, phrase, or framing label</h2>
+  <div class="evidence">
+    <!-- definition, diagram, key attributes, or brief explanation here -->
   </div>
 </section>
 ```
@@ -218,13 +231,17 @@ def example():
 </section>
 ```
 
-## Assertion-Evidence Rules
+## Headline Rules
 
-Every content slide MUST follow the Assertion-Evidence format. This is non-negotiable.
+Most content slides should follow the Assertion-Evidence format: an assertion headline (a complete sentence stating the slide's key point) backed by visual evidence. This is the default and should be the dominant pattern.
 
-### Headlines Must Be Assertions
+However, not every slide makes a claim. Some slides introduce concepts, define terminology, frame context, or pose questions. These slides may use **descriptive headlines** — short labels or phrases that orient the audience rather than assert a conclusion.
 
-The heading on each slide must be a complete sentence that states the slide's key point — an assertion, not a topic label.
+### Assertion Sentences (default)
+
+On `[assertion]` slides, the key claim is expressed as a full sentence in a `<p class="assertion">` element in the slide body — not in the heading. The `<h2>` heading is optional and serves as a short topic label when helpful.
+
+On `[metric]`, `[comparison]`, and `[image]` slides, the `<h2>` heading still carries the assertion as a complete sentence (these slide types don't have a separate assertion element).
 
 | Bad (topic phrase) | Good (assertion sentence) |
 |---|---|
@@ -233,7 +250,18 @@ The heading on each slide must be a complete sentence that states the slide's ke
 | "Cost Analysis" | "Annual infrastructure costs dropped 40% despite higher throughput" |
 | "Background" | "The legacy batch system could not meet real-time processing demands" |
 
-This rule applies to `[assertion]`, `[metric]`, `[comparison]`, `[code]`, and `[image]` slides. It does NOT apply to `[title]`, `[section]`, or `[quote]` slides.
+### Descriptive Headlines (when appropriate)
+
+Use descriptive headlines on `[concept]` slides and optionally on `[code]` slides where the code is self-explanatory. These may be short phrases, terms, or questions.
+
+| Example descriptive headlines |
+|---|
+| "What is eventual consistency?" |
+| "Key terms: producers, consumers, and brokers" |
+| "The CAP theorem" |
+| "API surface overview" |
+
+Assertion headlines should NOT appear on `[title]`, `[section]`, or `[quote]` slides.
 
 ### Body Must Be Visual Evidence
 
@@ -247,14 +275,14 @@ The area below the headline provides visual evidence supporting the assertion. P
 
 ### What to Avoid
 
-- **Bullet lists as slide body.** Convert to a table, split across slides, or use a column layout.
-- **If bullets are truly unavoidable**, limit to 3 items maximum, each under 8 words.
+- **Bullet lists as slide body.** Prefer tables, column layouts, or splitting across slides. If bullets are the clearest format (e.g., a short list of terms or attributes on a `[concept]` slide), limit to 3–4 items, each under 8 words.
 - **Large text blocks.** No slide should have more than 3 short lines of body text. Move detailed prose to speaker notes.
-- **Decorative visuals.** Never add clip art, stock photos, or decorative images. Every visual must directly support the assertion.
+- **Decorative visuals.** Never add clip art, stock photos, or decorative images. Every visual must directly support the slide's point.
 
 ## Slide Type Distribution
 
-`[assertion]` should be the dominant slide type — roughly 60–70% of content slides. Use other types for variety and emphasis:
+`[assertion]` should be the dominant slide type — roughly 50–70% of content slides. Use other types for variety and emphasis:
+- `[concept]` — for introducing terms, definitions, or frameworks the audience needs before you can make claims about them
 - `[metric]` — for the 1–3 most impactful numbers
 - `[comparison]` — when contrasting two approaches, before/after, or tradeoffs
 - `[code]` — for technical audiences when the code IS the point
@@ -278,7 +306,7 @@ Never fragment every element on a slide. If a slide has fragments, at least one 
 | Markdown | Slide treatment |
 |---|---|
 | `# H1` | Title slide or section divider |
-| `## H2` | Content slide — rewrite heading as assertion sentence |
+| `## H2` | Content slide — rewrite as assertion sentence, or use descriptive headline for concept/definition slides |
 | `### H3` and deeper | Fold into parent slide's evidence, or promote to own slide if substantial |
 
 ### Bullet Lists

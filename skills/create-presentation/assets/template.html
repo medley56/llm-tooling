@@ -31,10 +31,21 @@
 
     /* ── Assertion + evidence (core slide type) ── */
     .slide-assertion h2 {
-      font-size: 1.3em;
-      line-height: 1.3;
-      margin-bottom: 0.5em;
+      font-size: 1.1em;
+      line-height: 1.2;
+      margin-bottom: 0.3em;
       text-align: left;
+      opacity: 0.6;
+      font-weight: normal;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .slide-assertion .assertion {
+      font-size: 1.3em;
+      line-height: 1.4;
+      margin-bottom: 0.6em;
+      text-align: left;
+      font-weight: bold;
     }
     .evidence {
       display: flex;
@@ -175,15 +186,30 @@
       </section>
       -->
 
-      <!-- Example: assertion + table evidence -->
+      <!-- Example: assertion + table evidence (with optional topic label) -->
       <!--
       <section class="slide-assertion">
-        <h2>Response times improved 3x after the migration</h2>
+        <h2>Performance</h2>
+        <p class="assertion">Response times improved 3x after the migration.</p>
         <div class="evidence">
           <table>
             <tr><th>Metric</th><th>Before</th><th>After</th></tr>
             <tr><td>Throughput</td><td>1,000 req/s</td><td>3,200 req/s</td></tr>
             <tr><td>Latency (p99)</td><td>340ms</td><td>120ms</td></tr>
+          </table>
+        </div>
+      </section>
+      -->
+
+      <!-- Example: assertion without topic label -->
+      <!--
+      <section class="slide-assertion">
+        <p class="assertion">Event-driven architecture decouples producers from consumers.</p>
+        <div class="evidence">
+          <table>
+            <tr><th>Aspect</th><th>Request-driven</th><th>Event-driven</th></tr>
+            <tr><td>Coupling</td><td>Direct</td><td>Via message bus</td></tr>
+            <tr><td>Scaling</td><td>Vertical</td><td>Horizontal</td></tr>
           </table>
         </div>
       </section>
@@ -264,7 +290,7 @@ def handle_event(event: Event) -> None:
       <!-- Example: slide with fragments (incremental reveal) -->
       <!--
       <section class="slide-assertion">
-        <h2>Three factors drove the migration decision</h2>
+        <p class="assertion">Three factors drove the migration decision.</p>
         <div class="evidence">
           <table>
             <tr><th>Factor</th><th>Impact</th></tr>
