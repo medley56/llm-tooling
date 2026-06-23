@@ -13,7 +13,7 @@ metadata:
 
 # PR Summary Generator
 
-Generate a concise, markdown-formatted PR summary designed to help code reviewers quickly contextualize the changes on the current branch.
+Generate a concise, markdown-formatted PR summary designed to help code reviewers quickly contextualize the changes on the current branch with a focus on the overall goals and intent of the work.
 
 ## Instructions
 
@@ -105,15 +105,11 @@ Compose the PR summary using the analysis from Step 4 and any user-provided cont
 
 ## Key Decisions (optional)
 
-<Include only when the PR makes a non-obvious *final* choice whose rationale a reviewer would otherwise have to guess at. State the chosen approach and the goal it serves, in one or two sentences each. Do not recap alternatives weighed or paths abandoned — only the resulting decision and what goal it advances. Omit this section entirely if everything in the diff is the obvious implementation of the stated motivation.>
+<Include only when the PR makes a non-obvious *final* choice whose rationale a reviewer would otherwise have to guess at. State the chosen approach and the goal it serves, in one or two sentences each. Do not recap alternatives weighed or paths abandoned — only the resulting decision and what goal it advances. Implementation and factoring choices that do not affect the outcome or intent of the changes should not be included here. Omit this section entirely if everything in the diff is the obvious implementation of the stated motivation.>
 
 ## How to Review
 
-<Suggest a review strategy: recommended reading order, areas that deserve close scrutiny, mechanical/low-risk areas that can be skimmed, dependencies between change groups. Do NOT include a test plan or task checklist — automated unit and integration tests are the canonical correctness gate, and reviewers will run them as part of CI.>
-
-## Suggested Manual Verification (optional)
-
-<Include only when the change has behavior that automated tests don't easily cover — UI changes, deploy-time behavior, external integration touch points, etc. Frame each item as a suggestion ("you may want to check…", "consider verifying…"), never as a required checklist. Omit this section entirely if the automated test suite already covers the change.>
+<Suggest a review strategy based on the goals of the changes: recommended reading order, areas that deserve close scrutiny, mechanical/low-risk areas that can be skimmed, dependencies between change groups. Do NOT include a test plan or task checklist — automated unit and integration tests are the canonical correctness gate, and reviewers will run them as part of CI.>
 ```
 
 Guidelines for writing the summary:

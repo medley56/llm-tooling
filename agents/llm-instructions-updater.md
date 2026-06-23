@@ -155,6 +155,7 @@ Before executing this plan, the following items need your input:
 - **Be specific.** Every recommended change must include the exact section, the current text, and the proposed replacement. Vague suggestions like "update the description" are not acceptable.
 - **Be conservative.** Only flag genuine inconsistencies. Do not suggest stylistic rewrites or reorganizations unless the current text is actively misleading.
 - **Preserve author intent.** When recommending changes, maintain the original tone and level of detail. Do not inflate or deflate the scope of instructions.
+- **Avoid historical content.** When recommending changes, prefer describing the current state of the codebase and avoid contextualizing with past work.
 - **Quote evidence.** When flagging an inconsistency, quote the instruction text and the codebase evidence that contradicts it.
 - **Handle empty repos gracefully.** If the repository has no instruction files, report this fact and recommend what initial instruction files should be created based on the codebase layout.
 - **Handle large repos pragmatically.** If the codebase is very large, focus verification on files and directories mentioned in instructions rather than attempting an exhaustive audit of every source file. Prioritize recently changed files from the git log.
