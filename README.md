@@ -23,7 +23,11 @@ Skills are interactive, user-facing capabilities that guide the LLM through a sp
 
 | Skill | Description |
 |---|---|
+| [commit-message](skills/commit-message/) | Generates a plain-text commit message for the currently staged changes |
+| [create-gauntlet-loop-prompt](skills/create-gauntlet-loop-prompt/) | Interactively builds a "Gauntlet Loop" prompt — extracts the real requirements, sets an inspectable quality bar, and emits a builder/critic loop prompt for greenfield or existing codebases |
+| [create-presentation](skills/create-presentation/) | Creates a reveal.js HTML presentation from markdown, a topic description, or rough notes using the Assertion-Evidence slide design methodology |
 | [markdown-to-slidy](skills/markdown-to-slidy/) | Converts a Markdown document into a W3C Slidy2 HTML presentation using the Assertion-Evidence slide design methodology |
+| [pr-summary](skills/pr-summary/) | Generates a concise, reviewer-focused PR summary for the current branch |
 
 ---
 
