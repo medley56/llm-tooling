@@ -12,7 +12,7 @@ Agents are autonomous task runners that handle multi-step workflows. Each agent 
 
 | Agent | Description |
 |---|---|
-| [github-pr-reviewer](agents/github-pr-reviewer.md) | Reviews GitHub pull requests and provides structured feedback |
+| [github-pr-reviewer](agents/github-pr-reviewer.md) | Reviews GitHub pull requests and produces a structured review document organized by concept |
 | [github-pr-fixer](agents/github-pr-fixer.md) | Fetches PR review comments and produces a structured fix plan for every unresolved comment |
 | [pytest-runner](agents/pytest-runner.md) | Runs pytest with smart defaults, returns concise pass/fail reports with stack traces on failure |
 | [llm-instructions-updater](agents/llm-instructions-updater.md) | Audits LLM instruction files against the codebase and produces an update plan for anything stale or missing |
@@ -28,6 +28,7 @@ Skills are interactive, user-facing capabilities that guide the LLM through a sp
 | [create-presentation](skills/create-presentation/) | Creates a reveal.js HTML presentation from markdown, a topic description, or rough notes using the Assertion-Evidence slide design methodology |
 | [markdown-to-slidy](skills/markdown-to-slidy/) | Converts a Markdown document into a W3C Slidy2 HTML presentation using the Assertion-Evidence slide design methodology |
 | [pr-summary](skills/pr-summary/) | Generates a concise, reviewer-focused PR summary for the current branch |
+| [submit-github-pr-review](skills/submit-github-pr-review/) | Turns a drafted code review into a posted GitHub PR review — iterates with you finding-by-finding, then submits with an AI-assistance attribution header on every comment |
 
 ---
 

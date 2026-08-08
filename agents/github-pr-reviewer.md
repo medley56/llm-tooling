@@ -6,8 +6,28 @@ description: >
   pull request", "code review PR #123", or "check this PR for issues". Accepts
   a PR number, URL, or branch name. Optionally accepts a focus area and
   additional context. Produces a markdown review file named for the PR
-  (e.g., pr-123-review.md).
-tools: Bash, Read, Grep, Glob
+  (e.g., pr-123-review.md). Uses GitHub MCP server tools for all GitHub
+  operations. Does NOT use the gh CLI.
+tools:
+  - Bash
+  - Read
+  - Grep
+  - Glob
+  - ToolSearch
+  - ListMcpResourcesTool
+  - ReadMcpResourceTool
+  - mcp__github__get_me
+  - mcp__github__get_commit
+  - mcp__github__get_file_contents
+  - mcp__github__list_branches
+  - mcp__github__list_commits
+  - mcp__github__list_pull_requests
+  - mcp__github__pull_request_read
+  - mcp__github__search_pull_requests
+  - mcp__github__search_issues
+  - mcp__github__issue_read
+  - mcp__github__list_issues
+  - mcp__github__search_code
 model: inherit
 ---
 
@@ -39,25 +59,22 @@ Before reviewing, read project instruction and convention files so the review ca
 
 All conventions found apply to how you evaluate style, naming, testing, and architecture in Step 6. If conventions conflict, prefer the more specific file (e.g., `CLAUDE.md` over `README.md`).
 
-## Step 3: Discover Available GitHub Tools
+## Step 3: GitHub Tool Access
 
-Discover which GitHub tools are available. Try sources in this priority order:
+This agent's frontmatter `tools:` allowlist grants direct access to the GitHub MCP server tools needed for PR review — primarily `mcp__github__pull_request_read` (PR metadata, diff, files, review comments, status checks), `mcp__github__list_pull_requests`, and `mcp__github__search_pull_requests`. Invoke these directly in later steps.
 
-1. **GitHub MCP server** — use `ToolSearch` to look for MCP tools matching keywords like "github pull request diff review comment". Look for tools such as `mcp__github__get_pull_request`, `mcp__github__get_pull_request_diff`, `mcp__github__list_pull_request_files`, `mcp__github__get_pull_request_reviews`, `mcp__github__get_pull_request_status`, or similar.
-2. **VSCode GitHub extension** — use `ToolSearch` to look for tools with names containing `mcp__vscode__` related to GitHub pull requests or reviews.
-3. **`gh` CLI** — if neither MCP nor VSCode tools are available, verify `gh` CLI is installed and authenticated by running `gh auth status` via Bash. If `gh` is available, use it for all GitHub API operations.
-4. **No tools available** — if none of the above are available, exit immediately with this message:
+**Do NOT use the `gh` CLI for any GitHub operations.** If you need a tool's schema details before invoking it, use `ToolSearch` with `select:mcp__github__<name>`, or `ListMcpResourcesTool` to inspect what the MCP server exposes. Tool names vary by GitHub MCP server version — resolve the actual names via `ToolSearch` rather than assuming.
 
-> Cannot access GitHub PR data. No GitHub MCP server, VSCode GitHub extension, or authenticated `gh` CLI is available. Please configure one of these before running this agent.
+If GitHub MCP tool discovery fails — the tools above are not available, calls return errors indicating the server is unreachable or unauthenticated, or `ToolSearch`/`ListMcpResourcesTool` cannot resolve any `mcp__github__*` tools — **STOP immediately**. Do not proceed to subsequent steps. Do not fall back to the `gh` CLI. Do not review from local git state alone and do not fabricate PR metadata or comments. Return this exact message to the caller and end the agent:
 
-Record which tool source is available. Prefer MCP > VSCode > `gh` CLI for all subsequent GitHub operations.
+> **STOP — GitHub MCP server unavailable.** This agent cannot access the GitHub MCP server tools required to read PR data. The user must configure or authenticate the GitHub MCP server before this agent can run again. The calling session must treat this as a terminal failure and must not retry, attempt alternative approaches, or fall back to the `gh` CLI.
 
 ## Step 4: Resolve PR and Verify Branch State
 
 ### 4a: Resolve the PR
 
-- **If a PR number or URL was provided**: use the GitHub tools from Step 3 to fetch PR metadata (base branch, head branch, title, author, PR body).
-- **If a branch name was provided**: use GitHub tools to search for an open PR with that branch as head.
+- **If a PR number or URL was provided**: use the GitHub MCP tools from Step 3 to fetch PR metadata (base branch, head branch, title, author, PR body).
+- **If a branch name was provided**: use the GitHub MCP tools to search for an open PR with that branch as head.
 - **If nothing was provided**: run `git branch --show-current` and search for an open PR from the current branch.
 - **If no PR can be resolved**, exit with:
 
@@ -85,11 +102,11 @@ This determines how the changeset is obtained in Step 5.
 ### 5a: Get the changeset
 
 - **If `base_fresh`**: use local git. Run `git diff origin/<base_branch>...HEAD` for the full diff and `git diff --stat origin/<base_branch>...HEAD` for a file summary.
-- **If not `base_fresh`**: use the GitHub tools from Step 3 to fetch the diff from GitHub's API (e.g., `mcp__github__get_pull_request_diff` or `gh pr diff <number>`). This ensures the diff is accurate relative to the remote base, not a stale local base.
+- **If not `base_fresh`**: use the GitHub MCP tools from Step 3 to fetch the diff from GitHub (e.g., `mcp__github__pull_request_read` with the diff method). This ensures the diff is accurate relative to the remote base, not a stale local base. If the MCP diff call fails, STOP with the Step 3 message — do not substitute `gh pr diff`.
 
 ### 5b: Get PR metadata and existing review comments
 
-Using the GitHub tools from Step 3, fetch:
+Using the GitHub MCP tools from Step 3, fetch:
 
 - PR title, body/description, author, labels.
 - Existing review comments (to avoid duplicating feedback already given).
@@ -176,10 +193,12 @@ Findings are organized by **concept**, not by file. A single finding can span mu
 ## Step 8: Report
 
 - **On success**: return the file path of the review file and a one-line summary (e.g., "Review written to pr-123-review.md. Found 2 critical issues, 3 warnings, and 4 suggestions.").
-- **On failure**: return a clear error message explaining which step failed, what went wrong, and what the caller can do to resolve it.
+- **On failure**: return a clear error message explaining which step failed, what went wrong, and what the caller can do to resolve it. The calling session must treat this as a terminal failure and must not retry, attempt alternative approaches, or fall back to the `gh` CLI.
 
 ## Important Behavioral Rules
 
+- **GitHub MCP only.** All GitHub operations go through the `mcp__github__*` tools in the frontmatter allowlist. Never use the `gh` CLI, and never substitute local git state for PR data the MCP server could not provide. Use `ToolSearch` only to load a tool's schema, or `ListMcpResourcesTool` to inspect available MCP resources.
+- **STOP on tool failure.** If the GitHub MCP server tools are unavailable or every call fails, stop immediately, return the STOP message from Step 3, and end the agent. Never proceed with fabricated or assumed PR content.
 - **You are a reviewer, not a fixer.** Never edit source files. Never produce implementation plans or code patches. Your output is a review document with findings and assessments.
 - **Organize by concept, not by file.** Group related issues into a single finding even when they span multiple files. Do not produce a file-by-file list of issues.
 - **Be specific.** Every finding must reference specific file paths and line numbers. Vague observations like "error handling could be improved" without pointing to exact locations are not acceptable.
