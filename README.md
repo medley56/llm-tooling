@@ -15,7 +15,7 @@ Agents are autonomous task runners that handle multi-step workflows. Each agent 
 | [github-pr-reviewer](agents/github-pr-reviewer.md) | Reviews GitHub pull requests and produces a structured review document organized by concept |
 | [github-pr-fixer](agents/github-pr-fixer.md) | Fetches PR review comments and produces a structured fix plan for every unresolved comment |
 | [pytest-runner](agents/pytest-runner.md) | Runs pytest with smart defaults, returns concise pass/fail reports with stack traces on failure |
-| [llm-instructions-updater](agents/llm-instructions-updater.md) | Audits LLM instruction files against the codebase and produces an update plan for anything stale or missing |
+| [llm-instructions-updater](agents/llm-instructions-updater.md) | Audits LLM context — CLAUDE.md, `.github/` Copilot instructions, agents, skills, and roadmap files — for staleness and bloat, and produces an update plan |
 
 ### Skills
 
