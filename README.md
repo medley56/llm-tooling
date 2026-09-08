@@ -1,104 +1,130 @@
 # LLM Tooling
 
-A collection of reusable AI agents and skills designed to supercharge your development workflow. These tools work with **Claude Code**, **GitHub Copilot**, and other LLM-powered coding assistants — and are written to be project-agnostic so they can drop into any repository.
+Reusable agents, skills, and rules for LLM-powered coding assistants. Everything here is project-agnostic — written to drop into any repository.
+
+Built for **Claude Code**. The files are plain Markdown with YAML frontmatter, so other assistants can read them, but the discovery mechanisms below are Claude Code's.
 
 ---
 
 ## What's Inside
 
-### Agents
-
-Agents are autonomous task runners that handle multi-step workflows. Each agent is a Markdown file with YAML frontmatter defining its name, description, available tools, and detailed step-by-step instructions.
-
-| Agent | Description |
-|---|---|
-| [github-pr-reviewer](agents/github-pr-reviewer.md) | Reviews GitHub pull requests and produces a structured review document organized by concept |
-| [github-pr-fixer](agents/github-pr-fixer.md) | Fetches PR review comments and produces a structured fix plan for every unresolved comment |
-| [pytest-runner](agents/pytest-runner.md) | Runs pytest with smart defaults, returns concise pass/fail reports with stack traces on failure |
-| [llm-instructions-updater](agents/llm-instructions-updater.md) | Audits LLM context — CLAUDE.md, `.github/` Copilot instructions, agents, skills, and roadmap files — for staleness and bloat, and produces an update plan |
-
 ### Skills
 
-Skills are interactive, user-facing capabilities that guide the LLM through a specific creative or technical task. They live in their own directories and may include supporting assets.
+Skills are user-facing workflows, invoked by name as a slash command or matched automatically from their description. Each lives in its own directory with a `SKILL.md` and any supporting assets.
 
 | Skill | Description |
 |---|---|
-| [commit-message](skills/commit-message/) | Generates a plain-text commit message for the currently staged changes |
-| [create-gauntlet-loop-prompt](skills/create-gauntlet-loop-prompt/) | Interactively builds a "Gauntlet Loop" prompt — extracts the real requirements, sets an inspectable quality bar, and emits a builder/critic loop prompt for greenfield or existing codebases |
+| [commit](skills/commit/) | `/commit` — writes a commit message for the staged changes and makes the commit locally; falls back to showing the message when the repo says not to commit |
+| [pr-create](skills/pr-create/) | `/pr-create` — writes a reviewer-focused description for the current branch and opens the pull request on GitHub, with draft, label, reviewer, and assignee options |
+| [pr-review](skills/pr-review/) | `/pr-review` — end-to-end PR review: runs the github-pr-reviewer agent, iterates with you finding-by-finding, and posts the review to GitHub with an AI-assistance attribution header on every comment |
+| [pr-fix](skills/pr-fix/) | `/pr-fix` — end-to-end response to review feedback: plans a reply to every comment, walks you through them, implements, verifies, pushes, and replies on each thread |
 | [create-presentation](skills/create-presentation/) | Creates a reveal.js HTML presentation from markdown, a topic description, or rough notes using the Assertion-Evidence slide design methodology |
-| [markdown-to-slidy](skills/markdown-to-slidy/) | Converts a Markdown document into a W3C Slidy2 HTML presentation using the Assertion-Evidence slide design methodology |
-| [pr-summary](skills/pr-summary/) | Generates a concise, reviewer-focused PR summary for the current branch |
-| [submit-github-pr-review](skills/submit-github-pr-review/) | Turns a drafted code review into a posted GitHub PR review — iterates with you finding-by-finding, then submits with an AI-assistance attribution header on every comment |
+| [create-gauntlet-loop-prompt](skills/create-gauntlet-loop-prompt/) | Interactively builds a "Gauntlet Loop" prompt — extracts the real requirements, sets an inspectable quality bar, and emits a builder/critic loop prompt |
+
+### Agents
+
+Agents are sub-agents that run a multi-step task in their own context and report back. They are invoked by a skill or by name, and several of the skills above delegate to them.
+
+| Agent | Description |
+|---|---|
+| [github-pr-reviewer](agents/github-pr-reviewer.md) | Reviews a pull request and produces a review document organized by concept, with a severity on every finding |
+| [github-pr-fix-planner](agents/github-pr-fix-planner.md) | Fetches unresolved PR comments and plans a response to each, separating clear actions from ones needing clarification |
+| [repo-instructions-update-planner](agents/repo-instructions-update-planner.md) | Audits a repo's LLM context — CLAUDE.md, `.github/` Copilot instructions, agents, skills, rules, and roadmap files — for staleness and bloat, and produces an update plan |
+| [pytest-runner](agents/pytest-runner.md) | Runs pytest and reports results: a short summary on success, full stack traces on failure |
+
+### Rules
+
+Rules are topic-scoped instructions Claude Code loads from `.claude/rules/`. A rule with a `paths:` glob list loads only when a matching file is read; a rule without one loads at the start of every session, like `CLAUDE.md`. Use them to split conventions out of an oversized `CLAUDE.md` so each costs context only when relevant.
+
+| Rule | Loads when | Description |
+|---|---|---|
+| [pr-review-comments](rules/pr-review-comments.md) | A `pr-*-review*.md` document is read | What a PR review comment must say and how it should read — substance, tone, and formatting |
+| [test-suite-factoring](rules/test-suite-factoring.md) | A Python test file is read | How to structure a Python test suite — layout, fixtures, and what belongs in unit vs. integration vs. e2e tests |
 
 ---
 
 ## Installation
 
-Clone the repo directly into your workspace:
+Claude Code discovers skills, agents, and rules under `.claude/` in the repository you are working in. Clone this repo somewhere permanent, then link the pieces you want into the target repo:
 
 ```bash
-git clone https://github.com/medley56/llm-tooling.git
+git clone https://github.com/medley56/llm-tooling.git ~/src/llm-tooling
+
+cd /path/to/your-project
+mkdir -p .claude
+ln -s ~/src/llm-tooling/skills .claude/skills
+ln -s ~/src/llm-tooling/agents .claude/agents
+ln -s ~/src/llm-tooling/rules  .claude/rules
 ```
 
-That's it. No build step, no package manager, no configuration. Your LLM assistant will discover the agents and skills automatically from the file structure.
+Symlinking the whole directory means `git pull` in the clone updates every project at once. To take only some of it, link individual entries instead:
+
+```bash
+ln -s ~/src/llm-tooling/skills/commit .claude/skills/commit
+```
+
+Add `.claude/skills`, `.claude/agents`, and `.claude/rules` to the project's `.gitignore` if your team does not all use these tools.
 
 ### Updating
 
 ```bash
-cd llm-tooling && git pull
+cd ~/src/llm-tooling && git pull
 ```
 
 ---
 
 ## Usage
 
-### With Claude Code
-
-Agents are invoked automatically when Claude matches your request to an agent's description, or you can reference them explicitly:
+Invoke a skill as a slash command — `/commit`, `/pr-create`, `/pr-review`, `/pr-fix` — or just describe what you want and let Claude match your request to a skill or agent description:
 
 ```
-Use the pytest-runner agent to run my tests.
+Run the tests.
+Open a PR for this branch as a draft, and put @alice on it.
 ```
 
-Skills work the same way — ask Claude to convert a Markdown file to slides and the `markdown-to-slidy` skill activates.
+Rules need no invocation. A rule with `paths:` loads when Claude reads a file matching its globs; one without loads every session.
 
-### With GitHub Copilot
+### GitHub Access
 
-Copilot discovers Claude-format agent and skill definitions. Point your workspace to include this repo and the tools become available in Copilot Chat.
-
-### With Other LLM Assistants
-
-The agent and skill files are plain Markdown with YAML frontmatter. Any LLM tool that can read Markdown instructions can use them. The frontmatter schema:
-
-```yaml
----
-name: agent-name
-description: >
-  What the agent does and when to invoke it.
-tools: Bash, Read, Edit, ...
-model: inherit
----
-```
+The PR skills and agents use the **GitHub MCP server**, not the `gh` CLI. If MCP is unavailable they stop and tell you — usually a stale auth token, and refreshing it is the fastest fix. They will use `gh` only if you explicitly say so, and they will not troubleshoot `gh` for you.
 
 ---
 
-## Adding Your Own
+## Developing These Tools
 
-### New Agent
+This repo links its own tooling into `.claude/`, so the skills, agents, and rules are live while you work on them:
 
-Create a Markdown file in `agents/` following the existing pattern:
+```
+.claude/skills -> ../skills
+.claude/agents -> ../agents
+.claude/rules  -> ../rules
+```
 
-1. Add YAML frontmatter with `name`, `description`, `tools`, and `model`
-2. Write step-by-step instructions in the body
-3. The `description` field determines when the agent gets triggered — write clear activation phrases
+Edits take effect immediately — there is one copy of each file, and `.claude/` is only a view onto it. Start a new session to pick up frontmatter changes.
 
 ### New Skill
 
-Create a directory under `skills/` with a `SKILL.md` file:
+Create a directory under `skills/` with a `SKILL.md`:
 
-1. Add YAML frontmatter with `name`, `description`, and optional `metadata`
-2. Write interactive instructions (skills typically involve user dialogue)
-3. Include any supporting assets (templates, configs) in the same directory
+1. Frontmatter with `name` (this is the slash command), `description`, and optional `metadata`. The `description` decides when the skill is matched automatically — write the phrases a user would actually say.
+2. Write the workflow in the body.
+3. Put supporting assets in the same directory.
+
+### New Agent
+
+Create a Markdown file in `agents/`:
+
+1. Frontmatter with `name`, `description`, `tools`, and `model`. Set `model` to a specific model when the work does not need the session's default — `pytest-runner` uses `sonnet`.
+2. The `description` determines when the agent is triggered — write clear activation phrases.
+3. Write the steps in the body.
+
+### New Rule
+
+Create a Markdown file in `rules/`:
+
+1. Add a `paths:` list of globs so the rule loads only when a matching file is read. Omit `paths:` only if the rule genuinely applies to every session — it costs context in all of them.
+2. Keep it short and specific. A rule is not a manual.
+3. Do not restate what already lives in a skill or agent. Point at the canonical file so there is one source of truth.
 
 ---
 
