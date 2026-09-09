@@ -4,9 +4,43 @@
             "type": "http",
             "url": "https://api.githubcopilot.com/mcp/",
             "headers": {
-                "Authorization": "Bearer ${GITHUB_MCP_PERSONAL_PAT}",
+                "Authorization": "Bearer ${GITHUB_MCP_PAT}",
                 "X-MCP-Toolsets": "default,actions"
             }
+        },
+        "aws-mcp": {
+            "command": "uvx",
+            "args": [
+                "mcp-proxy-for-aws-cli==1.6.5",
+                "https://aws-mcp.us-east-1.api.aws/mcp",
+                "--metadata",
+                "AWS_REGION=us-west-2"
+            ],
+            "env": {
+                "AWS_MCP_PROXY_PROFILES": "${AWS_MCP_PROXY_PROFILES:-dev-sc-aws-mcp stage-sc-aws-mcp prod-sc-aws-mcp}"
+            },
+            "timeout": 100000,
+            "transport": "stdio"
+        },
+        "atlassian": {
+            "command": "uvx",
+            "args": [
+                "mcp-atlassian@0.23.1"
+            ],
+            "env": {
+                "JIRA_URL": "${DMZ_JIRA_URL}",
+                "JIRA_PERSONAL_TOKEN": "${DMZ_JIRA_PAT}",
+                "READ_ONLY_MODE": "${ATLASSIAN_READ_ONLY_MODE:-true}",
+                "TOOLSETS": "default,jira_agile,jira_projects",
+                "JIRA_PROJECTS_FILTER": "${PROJECTS_FILTER}",
+                "CONFLUENCE_URL": "${DMZ_CONFLUENCE_URL}",
+                "CONFLUENCE_PERSONAL_TOKEN": "${DMZ_CONFLUENCE_PAT}",
+                "CONFLUENCE_SPACES_FILTER": "${SPACES_FILTER}"
+            }
+        },
+        "notion": {
+            "type": "http",
+            "url": "https://mcp.notion.com/mcp"
         }
     }
 }
