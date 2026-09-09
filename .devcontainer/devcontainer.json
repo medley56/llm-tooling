@@ -5,7 +5,10 @@
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/base:trixie",
 	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
+	// uv provides uvx, which runs the stdio MCP servers pinned in .mcp.json.
+	"features": {
+		"ghcr.io/va-h/devcontainers-features/uv:1": {}
+	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 	// Configure tool-specific properties.
@@ -35,5 +38,7 @@
 	},
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
+	// Runs once, at container creation. Installs are here, not in postAttach.
+	"postCreateCommand": "./.devcontainer/post-create.sh",
 	"postAttachCommand": "./.devcontainer/setup.sh"
 }
