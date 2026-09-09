@@ -63,7 +63,7 @@ For each finding:
 
 - **Anchor** — `path`, `line`, `side` (`RIGHT` for added or context lines, `LEFT` for removed). Use `start_line`/`line` for a contiguous range. Confirm the line is inside a hunk; if it is not, the comment cannot be inline — mark it top-level and say why.
 - **One comment per finding.** A concept spanning several files anchors at the most important location and references the rest as `path:line` in the body. Do not fan one finding out across every file it touches.
-- **Body** — state the issue, why it matters, and what to do instead. Include a ```suggestion block only when the fix is a small, unambiguous, in-place edit on the commented lines. Follow `rules/pr-review-comments.md` (installed at `.claude/rules/`) if the repo carries it; read it now if it has not loaded.
+- **Body** — state the issue, why it matters, and what to do instead. Include a ```suggestion block only when the fix is a small, unambiguous, in-place edit on the commented lines. Comment prose follows `comment-style.md` in this skill directory — read it before drafting the first body.
 - **Disposition** — `include` by default; `propose-drop` for nitpicks and anything duplicating an existing comment.
 
 Also draft the **review summary body**: two to four sentences of overall assessment plus a severity tally.

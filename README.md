@@ -16,7 +16,7 @@ Skills are user-facing workflows, invoked by name as a slash command or matched 
 |---|---|
 | [commit](skills/commit/) | `/commit` — writes a commit message for the staged changes and makes the commit locally; falls back to showing the message when the repo says not to commit |
 | [pr-create](skills/pr-create/) | `/pr-create` — writes a reviewer-focused description for the current branch and opens the pull request on GitHub, with draft, label, reviewer, and assignee options |
-| [pr-review](skills/pr-review/) | `/pr-review` — end-to-end PR review: runs the github-pr-reviewer agent, iterates with you finding-by-finding, and posts the review to GitHub with an AI-assistance attribution header on every comment |
+| [pr-review](skills/pr-review/) | `/pr-review` — end-to-end PR review: runs the github-pr-reviewer agent, iterates with you finding-by-finding, and posts the review to GitHub with an AI-assistance attribution header on every comment. Carries `comment-style.md`, the comment-writing conventions the pr-fix skill and reviewer agent also follow |
 | [pr-fix](skills/pr-fix/) | `/pr-fix` — end-to-end response to review feedback: plans a reply to every comment, walks you through them, implements, verifies, pushes, and replies on each thread |
 | [create-presentation](skills/create-presentation/) | Creates a reveal.js HTML presentation from markdown, a topic description, or rough notes using the Assertion-Evidence slide design methodology |
 | [create-gauntlet-loop-prompt](skills/create-gauntlet-loop-prompt/) | Interactively builds a "Gauntlet Loop" prompt — extracts the real requirements, sets an inspectable quality bar, and emits a builder/critic loop prompt |
@@ -38,7 +38,7 @@ Rules are topic-scoped instructions Claude Code loads from `.claude/rules/`. A r
 
 | Rule | Loads when | Description |
 |---|---|---|
-| [pr-review-comments](rules/pr-review-comments.md) | A `pr-*-review*.md` document is read | What a PR review comment must say and how it should read — substance, tone, and formatting |
+| [general-rules](rules/general-rules.md) | Every session | How responses should read — plain, concrete, no tech-marketing register, no preamble |
 | [test-suite-factoring](rules/test-suite-factoring.md) | A Python test file is read | How to structure a Python test suite — layout, fixtures, and what belongs in unit vs. integration vs. e2e tests |
 
 ---

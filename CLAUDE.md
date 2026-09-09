@@ -7,11 +7,11 @@ Skills, sub-agents, and rules that Gavin installs into other repositories. **The
 - **`.claude/skills`, `.claude/agents`, and `.claude/rules` are symlinks** to the top-level directories of the same name. One copy of every file; edit the top-level one. The duplication is not real — do not "fix" it.
 - **Frontmatter changes need a new session.** Body edits are picked up on next use; `name`, `description`, and `tools` are read at load.
 - **A skill's `name` is its slash command.** Renaming a skill means renaming its directory, its `name:`, and every cross-reference. After any rename, `grep -rn '<old-name>' --include=*.md .` — the README and other skills point at each other by name.
-- **Rule frontmatter is `paths:` and nothing else** — a list of globs. No `name`, no `description`. A rule with no `paths:` loads in *every* session, so omit it only for something that genuinely always applies.
+- **Rule frontmatter is `paths:` and nothing else** — a list of globs. No `name`, no `description`. A rule with no `paths:` loads in *every* session, so omit it only for something that genuinely always applies. `rules/general-rules.md` omits it deliberately; everything narrower belongs in a skill instead, where it loads only when that workflow runs.
 - **Sub-agents cannot ask the user anything.** They run without a user present and return to their caller. An agent that needs a decision returns it as a question for the calling session to ask.
 
 ## Conventions These Files Share
 
 - **GitHub work goes through the MCP server.** The `gh` CLI is used only when the user explicitly approves it, per run. On MCP failure, tools stop, report, and name a stale auth token as the likely cause — they never troubleshoot `gh` or drag the user into a CLI debugging session.
-- **The 🤖 attribution header on posted comments is defined once**, in `skills/pr-review/SKILL.md`. Other files point at it rather than restating the wording.
+- **PR comment conventions live in `skills/pr-review/comment-style.md`**, and the 🤖 attribution header in `skills/pr-review/SKILL.md`. The pr-fix skill and the github-pr-reviewer agent point at those files rather than restating them.
 - **Write for a capable model.** Spend words on what is not discoverable — the ordering constraint, the tool that mangles multi-line input, the failure that looks like a different failure. Cut anything the model would learn faster by reading the repo. Reserve hard rules for destructive, irreversible, or outward-facing actions; elsewhere describe the goal and let judgment do the work.

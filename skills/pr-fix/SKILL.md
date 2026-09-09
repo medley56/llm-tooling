@@ -117,7 +117,7 @@ Every comment the user dispositioned gets a reply on its own thread, so the revi
 <reply body>
 ```
 
-Follow the comment-writing conventions in `rules/pr-review-comments.md` (installed at `.claude/rules/`) if the repo carries it; read it now if it has not loaded. A reply is a PR comment and holds to the same bar.
+A reply is a PR comment and holds to the same bar: read `.claude/skills/pr-review/comment-style.md` before drafting replies.
 
 - **Fixed** — what changed and where, with the commit SHA. Not "done."
 - **Reply** — the answer to the question, at the length the question deserves.

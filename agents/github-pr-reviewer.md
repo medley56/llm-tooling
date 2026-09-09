@@ -140,6 +140,8 @@ Skip feedback that duplicates existing review comments found in Step 5b.
 
 Produce a markdown file with the review. Write the file to the repository root as `pr-<number>-review.md` (e.g., `pr-123-review.md`).
 
+Finding prose is what the calling session turns into posted PR comments. If `.claude/skills/pr-review/comment-style.md` exists, read it and hold every finding to it.
+
 Use the following format:
 
 ```
