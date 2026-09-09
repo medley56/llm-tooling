@@ -8,7 +8,7 @@ description: >
   contents are unclear. Never pushes.
 metadata:
   author: llm-tooling
-  version: 5.0.0
+  version: 5.1.0
 ---
 
 # Commit
@@ -31,11 +31,11 @@ Say which paths you excluded and why.
 
 Ask when the answer is not obvious: unrelated units of work in one tree, a file that could be artifact or deliverable, a deliberate-looking staged subset that overlaps unstaged edits to the same files. A question costs less than an unwanted file in permanent history.
 
-Stage what you chose with an explicit `git add <path>` per file. **Never `git add -A`, `git add .`, or `git add -u`** — they sweep in whatever happens to be sitting in the tree.
+Stage by naming paths. **Never stage without naming a path** — `git add -A`, `git add .`, and a bare `git add -u` sweep in whatever else is sitting in the tree. A deletion stages like any other change: `git add <deleted-path>`, or `git rm <path>` if the file is still on disk. A rename stages as both paths. Then check `git diff --cached --stat` against the list you chose; if it does not match, fix the index before writing the message.
 
 ## When Not to Commit
 
-Draft the message anyway and hand it to the user instead of committing when the repo's own context restricts commits, when a merge, rebase, cherry-pick, or bisect is in progress, or when HEAD is detached. On the default branch, ask first and offer to branch. Say which condition applies and what they can run themselves.
+Draft the message anyway and hand it to the user instead of committing when the repo's own context restricts commits, when a merge, rebase, cherry-pick, or bisect is in progress, or when HEAD is detached. On the default branch, ask first and offer to branch — unless the user has already said this repo commits to its default branch, in session or in repo instructions, in which case commit and say you did. Say which condition applies and what they can run themselves.
 
 ## Message
 
