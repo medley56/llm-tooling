@@ -1,6 +1,6 @@
 {
     "mcpServers": {
-        "github": {
+        "github-mcp": {
             "type": "http",
             "url": "https://api.githubcopilot.com/mcp/",
             "headers": {
@@ -22,7 +22,7 @@
             "timeout": 100000,
             "transport": "stdio"
         },
-        "atlassian": {
+        "atlassian-mcp": {
             "command": "uvx",
             "args": [
                 "mcp-atlassian@0.23.1"
@@ -38,7 +38,7 @@
                 "CONFLUENCE_SPACES_FILTER": "${SPACES_FILTER}"
             }
         },
-        "notion": {
+        "notion-mcp": {
             "type": "http",
             "url": "https://mcp.notion.com/mcp"
         }
