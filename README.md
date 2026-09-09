@@ -14,7 +14,7 @@ Skills are user-facing workflows, invoked by name as a slash command or matched 
 
 | Skill | Description |
 |---|---|
-| [commit](skills/commit/) | `/commit` — writes a commit message for the staged changes and makes the commit locally; falls back to showing the message when the repo says not to commit |
+| [commit](skills/commit/) | `/commit` — works out what in the tree belongs in the commit from session context, writes a Conventional Commits message, and commits locally; never pushes |
 | [pr-create](skills/pr-create/) | `/pr-create` — writes a reviewer-focused description for the current branch and opens the pull request on GitHub, with draft, label, reviewer, and assignee options |
 | [pr-review](skills/pr-review/) | `/pr-review` — end-to-end PR review: runs the github-pr-reviewer agent, iterates with you finding-by-finding, and posts the review to GitHub with an AI-assistance attribution header on every comment. Carries `comment-style.md`, the comment-writing conventions the pr-fix skill and reviewer agent also follow |
 | [pr-fix](skills/pr-fix/) | `/pr-fix` — end-to-end response to review feedback: plans a reply to every comment, walks you through them, implements, verifies, pushes, and replies on each thread |
@@ -88,6 +88,8 @@ Rules need no invocation. A rule with `paths:` loads when Claude reads a file ma
 
 The PR skills and agents use the **GitHub MCP server**, not the `gh` CLI. If MCP is unavailable they stop and tell you — usually a stale auth token, and refreshing it is the fastest fix. They will use `gh` only if you explicitly say so, and they will not troubleshoot `gh` for you.
 
+Their tool references are `mcp__github-mcp__*`, matching the `github-mcp` entry in this repo's [.mcp.json](.mcp.json), which reads its token from `$GITHUB_MCP_PAT`. **A server registered under a different name will not resolve those tools** — either register it as `github-mcp`, or update the `tools:` lists in `agents/` and the `ToolSearch` selectors in `skills/`.
+
 ---
 
 ## Developing These Tools
@@ -101,6 +103,8 @@ This repo links its own tooling into `.claude/`, so the skills, agents, and rule
 ```
 
 Edits take effect immediately — there is one copy of each file, and `.claude/` is only a view onto it. Start a new session to pick up frontmatter changes.
+
+The devcontainer installs `uv` as a feature and pre-fetches the pinned stdio MCP servers in [.devcontainer/post-create.sh](.devcontainer/post-create.sh), which runs at container creation only.
 
 ### New Skill
 

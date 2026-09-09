@@ -9,9 +9,21 @@ Skills, sub-agents, and rules that Gavin installs into other repositories. **The
 - **A skill's `name` is its slash command.** Renaming a skill means renaming its directory, its `name:`, and every cross-reference. After any rename, `grep -rn '<old-name>' --include=*.md .` — the README and other skills point at each other by name.
 - **Rule frontmatter is `paths:` and nothing else** — a list of globs. No `name`, no `description`. A rule with no `paths:` loads in *every* session, so omit it only for something that genuinely always applies. `rules/general-rules.md` omits it deliberately; everything narrower belongs in a skill instead, where it loads only when that workflow runs.
 - **Sub-agents cannot ask the user anything.** They run without a user present and return to their caller. An agent that needs a decision returns it as a question for the calling session to ask.
+- **MCP tool names carry the server name.** The GitHub tools are written `mcp__github-mcp__*`, matching the `github-mcp` key in `.mcp.json`. Rename the server and every `tools:` list and `ToolSearch` selector has to move with it.
+
+## Writing Skills, Agents, and Rules
+
+Every file here is a prompt for a Claude 5-generation model, so [the rules of context engineering](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models) are the house style. The target is the **minimum token count that preserves behavior**.
+
+- **Cut any sentence whose removal does not change what the model does.** Justification, restatement, and encouragement are all cost with no behavior attached.
+- **Write the gotcha, not the manual.** Spend words on what is not discoverable: the ordering constraint, the tool that mangles multi-line input, the failure that looks like a different failure. Anything the model learns faster by reading the repo is waste.
+- **Do not over-constrain.** Describe the goal and let judgment do the work. Reserve hard rules for destructive, irreversible, or outward-facing actions — pushing, posting, deleting.
+- **Disclose progressively.** `SKILL.md` holds the workflow; detail that only one step needs goes in a sibling file that step reads, the way `skills/pr-review/comment-style.md` does.
+- **One source of truth.** Point at the canonical file rather than restating it. Text duplicated in two files drifts.
+- **A `Rules` section carries only what the steps do not already say.** Restating a step as a rule doubles its cost and halves its authority.
+- **The `description` is the trigger, not a summary.** It decides when a skill or agent gets matched, so write the phrases a user would actually say.
 
 ## Conventions These Files Share
 
 - **GitHub work goes through the MCP server.** The `gh` CLI is used only when the user explicitly approves it, per run. On MCP failure, tools stop, report, and name a stale auth token as the likely cause — they never troubleshoot `gh` or drag the user into a CLI debugging session.
 - **PR comment conventions live in `skills/pr-review/comment-style.md`**, and the 🤖 attribution header in `skills/pr-review/SKILL.md`. The pr-fix skill and the github-pr-reviewer agent point at those files rather than restating them.
-- **Write for a capable model.** Spend words on what is not discoverable — the ordering constraint, the tool that mangles multi-line input, the failure that looks like a different failure. Cut anything the model would learn faster by reading the repo. Reserve hard rules for destructive, irreversible, or outward-facing actions; elsewhere describe the goal and let judgment do the work.

@@ -9,61 +9,48 @@ description: >
   Google Slides, Keynote, or W3C Slidy formats.
 metadata:
   author: llm-tooling
-  version: 1.0.0
+  version: 1.0.1
 ---
 
 # Create Presentation
 
-Create a reveal.js HTML presentation guided by the Assertion-Evidence slide design methodology. Most content slides should use assertion headlines backed by visual evidence, but some slides may serve other purposes — introducing concepts, defining terms, framing context, or posing questions. Accepts markdown files, topic descriptions, or rough notes as input.
+Create a reveal.js HTML presentation using the Assertion-Evidence methodology: most content slides carry an assertion headline backed by visual evidence, while some exist to introduce a concept, define a term, frame context, or pose a question.
 
-## Instructions
+Output path: what the user gives, else `presentation.html` in the working directory, else the input markdown's directory with a `.html` extension.
 
-The user provides content (a markdown file path, topic description, or notes) and optionally an output path and theme. If no output path is given, write the HTML file in the current working directory as `presentation.html`. If the input is a markdown file, use the same directory with a `.html` extension.
+## Step 1: Understand and Plan
 
-### Step 1: Understand and Plan
+Read the user's input — a file if they gave a path, otherwise the topic or notes. Identify the title and author, the structure, the key claims, the supporting evidence, and whether there is a clear narrative arc.
 
-Read the user's input. If it's a file path, read the file. If it's a topic or notes, work from what's provided.
-
-Identify:
-- **Title and author** from front matter, headings, or context
-- **Document structure** — headings, sections, hierarchy
-- **Key claims** — the main points or arguments
-- **Supporting evidence** — data, examples, code, tables
-- **Logical flow** — whether there's a clear narrative arc
-
-If the input is unclear, poorly organized, or just a topic, ask these focusing questions (skip any that are already obvious from the input):
+If the input is unclear, poorly organized, or just a topic, ask what is not already obvious:
 
 1. **"Who is the audience?"** — calibrates technical depth and framing
 2. **"What is the ONE thing you want the audience to remember?"** — forces focus
 3. **"What should the audience DO after this presentation?"** — ensures action orientation
 
-Ask the user which reveal.js theme they'd like. Present the options:
+Ask which theme they want, defaulting to `black`:
 
 | Theme | Description |
 |-------|-------------|
-| `white` | Clean and minimal — good for professional and corporate presentations |
-| `black` | Dark background with white text — modern, high contrast |
+| `white` | Clean and minimal — professional and corporate |
+| `black` | Dark background, white text — modern, high contrast |
 | `league` | Dark grey with subtle texture — polished and understated |
 | `beige` | Warm paper-like background — approachable and academic |
 | `sky` | Light blue gradient — friendly and open |
-| `night` | Dark blue background — good for technical and evening talks |
+| `night` | Dark blue — technical and evening talks |
 | `serif` | Traditional serif fonts — formal and classic |
 | `simple` | Plain white, minimal styling — maximum content focus |
-| `solarized` | Solarized color scheme — easy on the eyes for code-heavy talks |
+| `solarized` | Solarized — easy on the eyes for code-heavy talks |
 | `blood` | Dark with red accents — bold and dramatic |
 | `moon` | Dark blue-grey — subtle and calm |
 
-If the user has no preference, default to `black`.
+The name goes straight into the `{{THEME}}` placeholder.
 
-Assess organization quality:
-- **Well-organized:** Clear structure, logical flow. Proceed to Step 2.
-- **Poorly organized:** Tell the user what issues you found. Ask them to describe the intended narrative arc or key takeaways before proceeding.
+If the input is poorly organized, say what is wrong with it and ask for the intended narrative arc or key takeaways before continuing.
 
-### Step 2: Outline with Narrative Arc
+## Step 2: Outline with Narrative Arc
 
-Present a slide outline grouped into narrative beats. Each entry includes a slide-type tag and an assertion-style headline. The narrative beats guide the story structure — adapt the beat names to fit the content (e.g., "Context" instead of "Problem" for non-problem-solving presentations).
-
-Example:
+Present a slide outline grouped into narrative beats, each entry tagged with a slide type and an assertion-style headline. Adapt the beat names to the content ("Context" rather than "Problem" for non-problem-solving talks).
 
 > I've structured your presentation into a narrative arc:
 >
@@ -90,42 +77,36 @@ Example:
 >
 > Would you like to adjust the flow, reorder sections, or change any slide types?
 
-Available slide-type tags:
+Slide-type tags:
+
 - `[title]` — title or closing slide (centered, large text)
-- `[section]` — section divider (dark background, used between narrative beats)
+- `[section]` — section divider between narrative beats
 - `[assertion]` — standard content slide (assertion headline + evidence)
 - `[concept]` — introduces a term, definition, framework, or idea without making a claim
-- `[metric]` — key number or statistic (assertion headline + large figure)
-- `[comparison]` — two-column side-by-side layout
-- `[code]` — code-focused slide (assertion headline or descriptive headline + code block)
+- `[metric]` — key number or statistic
+- `[comparison]` — two-column side-by-side
+- `[code]` — code-focused slide
 - `[quote]` — emphasized quotation with attribution
-- `[image]` — slide with a diagram, chart, or visual (generates placeholder if no image provided)
+- `[image]` — diagram, chart, or visual (placeholder if no image provided)
 
-Guide the user on flow improvements: suggest reordering, combining related slides, splitting dense ones, or changing slide types. The goal is a presentation that tells a clear story.
+Suggest reordering, combining related slides, splitting dense ones, or changing types.
 
-CRITICAL: Wait for the user's approval or adjustments before proceeding to Step 3.
+**CRITICAL: wait for approval or adjustments before Step 3.**
 
-### Step 3: Generate HTML
+## Step 3: Generate HTML
 
-1. Read the template at `assets/template.html` (relative to this skill's directory)
-2. Replace `{{TITLE}}`, `{{AUTHOR}}`, `{{DATE}}`, and `{{THEME}}` placeholders
-3. Generate a `<section>` element for each approved slide using the appropriate CSS class and HTML pattern (see Slide Type Reference below)
-4. Add `class="fragment"` for incremental reveals where appropriate (see Fragment Rules)
-5. Include `<aside class="notes"></aside>` on every slide — populate with talking points from the source material's prose, or leave empty if no notes are needed
-6. Write the complete HTML file to the output path
+1. Read the template at `assets/template.html` (relative to this skill's directory).
+2. Fill in `{{TITLE}}`, `{{AUTHOR}}`, `{{DATE}}`, `{{THEME}}`.
+3. Generate a `<section>` per approved slide using the patterns below.
+4. Add `class="fragment"` only where the Fragment Rules allow.
+5. Include `<aside class="notes"></aside>` on every slide, populated from the source prose or left empty.
+6. Write the file to the output path.
 
-### Step 4: Summarize
+## Step 4: Summarize
 
-Report to the user:
-- Total slide count
-- Output file path
-- Theme used
-- Any visualization placeholders that need replacement (list slide numbers and descriptions)
-- Usage tips: open in a browser; press `S` for speaker notes view; press `ESC` for slide overview grid; press `F` for fullscreen
+Report the slide count, output path, theme, and every visualization placeholder needing replacement (slide number and description). Close with the keys: `S` speaker notes, `ESC` overview grid, `F` fullscreen.
 
 ## Slide Type Reference
-
-Map each slide-type tag to its HTML pattern:
 
 ### [title]
 ```html
@@ -146,7 +127,7 @@ Map each slide-type tag to its HTML pattern:
 ```
 
 ### [assertion]
-The `<h2>` is optional — include it when a short topic label helps orient the audience; omit it when the assertion sentence alone is sufficient.
+The `<h2>` is optional — a short topic label when it helps orient the audience, omitted when the assertion alone carries the slide.
 ```html
 <section class="slide-assertion">
   <h2>Optional short topic label</h2>
@@ -222,7 +203,7 @@ def example():
 </section>
 ```
 
-### [image] with background
+### [image], as a background
 ```html
 <section class="slide-image" data-background-image="path/to/image.png" data-background-size="contain">
   <h2>Assertion about what the image shows</h2>
@@ -230,7 +211,7 @@ def example():
 </section>
 ```
 
-### [image] with placeholder
+### [image], as a placeholder
 ```html
 <section class="slide-image">
   <h2>Assertion about what the image shows</h2>
@@ -241,8 +222,8 @@ def example():
 </section>
 ```
 
-### [image] with inline image
-When using an inline `<img>` element instead of a placeholder or background image, add `class="r-stretch"` to the `<img>` tag so reveal.js automatically sizes it to fill available slide space. This also ensures correct sizing in print-pdf export mode.
+### [image], inline
+`class="r-stretch"` makes reveal.js size the image to the available space, and keeps it correct in print-pdf export.
 ```html
 <section class="slide-image">
   <h2>Assertion about what the image shows</h2>
@@ -253,15 +234,9 @@ When using an inline `<img>` element instead of a placeholder or background imag
 
 ## Headline Rules
 
-Most content slides should follow the Assertion-Evidence format: an assertion headline (a complete sentence stating the slide's key point) backed by visual evidence. This is the default and should be the dominant pattern.
+Assertion-Evidence is the default and dominant pattern. Slides that introduce concepts, define terms, frame context, or pose questions may instead use a **descriptive headline** — a short label that orients rather than asserts.
 
-However, not every slide makes a claim. Some slides introduce concepts, define terminology, frame context, or pose questions. These slides may use **descriptive headlines** — short labels or phrases that orient the audience rather than assert a conclusion.
-
-### Assertion Sentences (default)
-
-On `[assertion]` slides, the key claim is expressed as a full sentence in a `<p class="assertion">` element in the slide body — not in the heading. The `<h2>` heading is optional and serves as a short topic label when helpful.
-
-On `[metric]`, `[comparison]`, and `[image]` slides, the `<h2>` heading still carries the assertion as a complete sentence (these slide types don't have a separate assertion element).
+On `[assertion]` slides the claim is a full sentence in `<p class="assertion">`, not in the heading. On `[metric]`, `[comparison]`, and `[image]` slides the `<h2>` carries the assertion, since they have no separate assertion element.
 
 | Bad (topic phrase) | Good (assertion sentence) |
 |---|---|
@@ -270,166 +245,58 @@ On `[metric]`, `[comparison]`, and `[image]` slides, the `<h2>` heading still ca
 | "Cost Analysis" | "Annual infrastructure costs dropped 40% despite higher throughput" |
 | "Background" | "The legacy batch system could not meet real-time processing demands" |
 
-### Descriptive Headlines (when appropriate)
+Descriptive headlines suit `[concept]` slides and `[code]` slides whose code speaks for itself: "What is eventual consistency?", "Key terms: producers, consumers, and brokers", "The CAP theorem".
 
-Use descriptive headlines on `[concept]` slides and optionally on `[code]` slides where the code is self-explanatory. These may be short phrases, terms, or questions.
-
-| Example descriptive headlines |
-|---|
-| "What is eventual consistency?" |
-| "Key terms: producers, consumers, and brokers" |
-| "The CAP theorem" |
-| "API surface overview" |
-
-Assertion headlines should NOT appear on `[title]`, `[section]`, or `[quote]` slides.
+No assertion headline on `[title]`, `[section]`, or `[quote]` slides.
 
 ### Body Must Be Visual Evidence
 
-The area below the headline provides visual evidence supporting the assertion. Prefer these formats in priority order:
+In priority order: a single large figure (`.key-point`), a table, a code snippet (max 15 lines), a two- or three-item column layout (`.columns`), or a visualization — the last only when the outline tagged the slide `[image]`.
 
-1. **Key number or metric** — a single large, bold figure (`.key-point` class)
-2. **Table** — for comparisons, before/after data, feature matrices
-3. **Code snippet** — for technical presentations (max 15 lines per slide)
-4. **Column layout** — two or three items side by side (`.columns` class)
-5. **Visualization or placeholder** — only when the outline includes an `[image]` tag
-
-### What to Avoid
-
-- **Bullet lists as slide body.** Prefer tables, column layouts, or splitting across slides. If bullets are the clearest format (e.g., a short list of terms or attributes on a `[concept]` slide), limit to 3–4 items, each under 8 words.
-- **Large text blocks.** No slide should have more than 3 short lines of body text. Move detailed prose to speaker notes.
-- **Decorative visuals.** Never add clip art, stock photos, or decorative images. Every visual must directly support the slide's point.
+- **No bullet lists as the slide body.** Prefer tables, columns, or a split across slides. Where bullets genuinely are clearest, cap at 3–4 items of under 8 words.
+- **No large text blocks.** At most 3 short lines of body text; detailed prose goes to speaker notes.
+- **No decorative visuals.** No clip art, no stock photos. Every visual supports the point.
 
 ## Slide Type Distribution
 
-`[assertion]` should be the dominant slide type — roughly 50–70% of content slides. Use other types for variety and emphasis:
-- `[concept]` — for introducing terms, definitions, or frameworks the audience needs before you can make claims about them
-- `[metric]` — for the 1–3 most impactful numbers
-- `[comparison]` — when contrasting two approaches, before/after, or tradeoffs
-- `[code]` — for technical audiences when the code IS the point
-- `[quote]` — sparingly, for a memorable closing or framing statement
-- `[image]` — only when a visual genuinely communicates better than text
-- `[section]` — to separate major narrative beats (don't overuse; 2–4 per presentation)
+`[assertion]` carries 50–70% of content slides. The rest provide variety and emphasis: `[concept]` for terms the audience needs before you can make claims about them, `[metric]` for the 1–3 most impactful numbers, `[comparison]` for tradeoffs and before/after, `[code]` when the code *is* the point, `[quote]` sparingly for a closing or framing line, `[image]` only when a visual beats text, `[section]` 2–4 times to separate beats.
 
 ## Fragment Rules
 
-Use `class="fragment"` for incremental reveal ONLY in these cases:
-- **Sequential steps** that build on each other
-- **Table rows** revealed one at a time to walk through data
-- **Punchline reveals** where the final item is the key insight
-
-Never fragment every element on a slide. If a slide has fragments, at least one element should be visible immediately.
+Use `class="fragment"` only for sequential steps that build, table rows walked through one at a time, and a punchline where the final item is the insight. Never fragment every element — at least one must be visible immediately.
 
 ## Content Transformation Rules
-
-### Headings
 
 | Markdown | Slide treatment |
 |---|---|
 | `# H1` | Title slide or section divider |
-| `## H2` | Content slide — rewrite as assertion sentence, or use descriptive headline for concept/definition slides |
-| `### H3` and deeper | Fold into parent slide's evidence, or promote to own slide if substantial |
+| `## H2` | Content slide — rewrite as an assertion sentence, or a descriptive headline for concept slides |
+| `### H3` and deeper | Fold into the parent slide's evidence, or promote if substantial |
 
-### Bullet Lists
+**Bullet lists** do not survive as lists: 2–3 items become a `.columns` layout, a comparison becomes a table, sequential steps become one slide per step or a numbered column layout, and 4+ items get grouped into categories across several slides.
 
-Do not reproduce bullet lists on slides. Transform them:
-- **Short list (2–3 items):** Column layout with `.columns` class
-- **Comparison list:** Convert to a table
-- **Sequential steps:** Split into one slide per step, or use a numbered column layout
-- **Long list (4+ items):** Group into categories and spread across multiple slides
+**Code blocks** render as `<pre><code data-trim data-noescape class="language-X">` for highlight.js, at most 15 lines per slide; split longer ones with a headline explaining each segment.
 
-### Code Blocks
+**Tables** convert directly to HTML inside `.evidence`. Split very wide ones across slides.
 
-- Render with `<pre><code data-trim data-noescape class="language-X">` for highlight.js
-- Maximum 15 lines per slide
-- If longer, split across slides with assertion headlines explaining each segment
-- Use syntax context in the headline (e.g., "The handler validates input before queuing the event")
-
-### Tables
-
-- Convert directly to HTML `<table>` elements inside the `.evidence` container
-- Tables pair well with assertion headlines
-- For very wide tables, consider splitting columns across slides
-
-### Prose Paragraphs
-
-- Distill the key claim into the assertion headline
-- Extract data points, comparisons, or metrics for the evidence area
-- Place the full paragraph text in `<aside class="notes">` for speaker notes
+**Prose paragraphs** become an assertion headline plus extracted data points, with the full text in `<aside class="notes">`.
 
 ## Visualization Policy
 
-- **Default to no visualizations.** Most concepts work with text, tables, or numbers.
-- **Never use clip art or stock imagery.**
-- **Visualizations are signaled in the outline** via `[image]` tags — the user approves them as part of the outline, not in a separate step.
-- **Placeholder format:** Use the `.placeholder` class with `data-viz-type` and `data-viz-description` attributes. Valid `data-viz-type` values: `diagram`, `chart`, `graph`, `screenshot`, `photo`.
-- **Generate SVG if requested** — complex visualizations should be in separate `.svg` files referenced from the HTML to keep the output clean.
+- **Default to none.** Most concepts work with text, tables, or numbers.
+- Visualizations are approved as part of the outline, via `[image]` tags — never introduced in a separate step.
+- Placeholders use `.placeholder` with `data-viz-type` (`diagram`, `chart`, `graph`, `screenshot`, `photo`) and `data-viz-description`.
+- Complex visualizations go in separate `.svg` files referenced from the HTML.
 
 ## HTML Output Constraints
 
-- Output must be valid HTML5
-- Use CDN-loaded reveal.js 5.x from `https://unpkg.com/reveal.js@5/`
-- Load plugins: highlight.js (code syntax) and notes (speaker notes)
-- Cap at approximately 20 content slides. If the source material would produce more, suggest splitting into multiple presentations and ask the user which sections to prioritize.
-- Every content slide uses a `<section>` element with the appropriate slide-type class
-- The template includes `pdfSeparateFragments: false` (so fragments don't generate extra PDF pages), `slideNumber: 'c/t'`, and `showSlideNumber: 'all'` for print-pdf compatibility — do not remove these config options
-
-## Available Themes
-
-`white`, `black` (default), `league`, `beige`, `sky`, `night`, `serif`, `simple`, `solarized`, `blood`, `moon`
-
-These map directly to reveal.js theme CSS files. Use the theme name as the `{{THEME}}` placeholder value.
-
-## Examples
-
-### Example 1: Markdown file
-User says: "Create a presentation from my architecture doc"
-
-Actions:
-1. Read the markdown file
-2. Ask about audience and theme preference
-3. Propose narrative-arc outline with slide-type tags
-4. After approval, generate reveal.js HTML
-Result: HTML presentation file with chosen theme
-
-### Example 2: Topic description
-User says: "Make a presentation about migrating from monolith to microservices"
-
-Actions:
-1. Ask focusing questions (audience, key takeaway, desired action)
-2. Ask about theme preference
-3. Propose narrative-arc outline based on the topic
-4. After approval, generate reveal.js HTML
-Result: HTML presentation built from topic description
-
-### Example 3: Rough notes
-User says: "Turn these meeting notes into slides" (poorly organized input)
-
-Actions:
-1. Read the notes, identify organizational issues
-2. Ask: "These notes cover several topics. What are the 3–4 key takeaways?"
-3. Ask about theme preference
-4. After user guidance, propose a structured outline
-5. After approval, generate HTML
-Result: Organized presentation distilled from unstructured notes
+- Valid HTML5, reveal.js 5.x from `https://unpkg.com/reveal.js@5/`, with the highlight.js and notes plugins loaded.
+- Cap at roughly 20 content slides. Beyond that, suggest splitting into multiple presentations and ask which sections to prioritize.
+- Every content slide is a `<section>` with its slide-type class.
+- Keep the template's `pdfSeparateFragments: false`, `slideNumber: 'c/t'`, and `showSlideNumber: 'all'` — they are what make print-pdf output correct.
 
 ## Troubleshooting
 
-**Slides render without styling:**
-Cause: Browser cannot reach the CDN-hosted CSS/JS files (offline or firewall).
-Solution: Download reveal.js dist locally and update the HTML references to use local paths.
-
-**Code highlighting not working:**
-Cause: Missing language class or plugin not loaded.
-Solution: Ensure `<code>` has a `class="language-X"` attribute and `RevealHighlight` is in the plugins array.
-
-**Too many slides generated:**
-Cause: Source material is very long.
-Solution: The skill caps at ~20 content slides. Ask the user which sections to prioritize or suggest splitting into multiple presentations.
-
-**Speaker notes not showing:**
-Cause: Speaker view requires HTTP serving in some browsers.
-Solution: Press `S` to open speaker view. If it doesn't work from `file://`, serve with `python -m http.server` or similar.
-
-**Fragments not animating:**
-Cause: Missing `class="fragment"` or incorrect element nesting.
-Solution: Ensure `class="fragment"` is on the correct child elements, not on the `<section>`.
+- **No styling** — the browser cannot reach the CDN. Download the reveal.js dist and point the HTML at local paths.
+- **Speaker notes will not open** — speaker view needs HTTP in some browsers. Serve the file (`python -m http.server`) rather than opening it from `file://`.
+- **Code not highlighted** — the `<code>` element needs `class="language-X"` and `RevealHighlight` must be in the plugins array.
