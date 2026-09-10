@@ -88,7 +88,7 @@ Rules need no invocation. A rule with `paths:` loads when Claude reads a file ma
 
 The PR skills and agents use the **GitHub MCP server**, not the `gh` CLI. If MCP is unavailable they stop and tell you — usually a stale auth token, and refreshing it is the fastest fix. They will use `gh` only if you explicitly say so, and they will not troubleshoot `gh` for you.
 
-Their tool references are `mcp__github-mcp__*`, matching the `github-mcp` entry in this repo's [.mcp.json](.mcp.json), which reads its token from `$GITHUB_MCP_PAT`. **A server registered under a different name will not resolve those tools** — either register it as `github-mcp`, or update the `tools:` lists in `agents/` and the `ToolSearch` selectors in `skills/`.
+Their tool references are `mcp__github-mcp__*`, matching the `github-mcp` entry in this repo's [.mcp.json](.mcp.json), which authenticates over OAuth against a personal GitHub App — set `GITHUB_MCP_APP_CLIENT_ID` to that app's client ID and give the app a callback URL on port 7878 to match `callbackPort`, then authorize once with `/mcp`. **A server registered under a different name will not resolve those tools** — either register it as `github-mcp`, or update the `tools:` lists in `agents/` and the `ToolSearch` selectors in `skills/`.
 
 ---
 

@@ -2,10 +2,10 @@
     "mcpServers": {
         "github-mcp": {
             "type": "http",
-            "url": "https://api.githubcopilot.com/mcp/",
-            "headers": {
-                "Authorization": "Bearer ${GITHUB_MCP_PAT}",
-                "X-MCP-Toolsets": "default,actions"
+            "url": "https://api.githubcopilot.com/mcp/x/all",
+            "oauth": {
+                "clientId": "${GITHUB_MCP_APP_CLIENT_ID}",
+                "callbackPort": 7878
             }
         },
         "aws-mcp": {
