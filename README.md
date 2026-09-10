@@ -99,10 +99,23 @@ pass an OAuth client secret, and `github-mcp` will not authenticate without one.
 Re-run the script after editing the template — nothing picks the edit up on its
 own.
 
-Values for the template's `${VAR}` placeholders go in the `env` block of
-`.claude/settings.local.json`, which is gitignored in every repo and so is the
-one safe place for a token. The script reads that file directly, because Claude
-applies the block to its own sessions but never exports it to a shell.
+Values for the template's `${VAR}` placeholders are read from the **current
+directory**, not from wherever the template lives — run the script from the repo
+whose secrets it should use. It looks at, best first:
+
+```
+<the environment>
+$PWD/.claude/settings.local.json    env block
+$PWD/.claude/settings.json          env block
+$PWD/.env                           KEY=value, `export` and quotes allowed
+$CLAUDE_CONFIG_DIR/settings.json    env block
+```
+
+Prefer `.claude/settings.local.json`: it is gitignored in every repo, which
+makes it the one safe place for a token. The script parses these files rather
+than relying on the environment because its main caller, a devcontainer
+`postCreate` hook, runs before any Claude session exists and so has none of
+these variables set.
 
 It substitutes every placeholder before calling the CLI. Claude Code expands
 `${VAR}` only for a project-scope `.mcp.json`; a user-scope server keeps the

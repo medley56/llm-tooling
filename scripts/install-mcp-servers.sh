@@ -2,6 +2,10 @@
 # Installs the MCP servers described by mcp-servers.json into Claude Code's
 # user scope, so every repo on this machine gets them.
 #
+# Run it from the repo whose secrets you want to use — the template travels with
+# this script, but the values for its placeholders are read from the current
+# directory. That is what lets one template serve several repos.
+#
 # mcp-servers.json is a template, not a live config. Naming it .mcp.json would
 # make Claude Code load it directly, and a project-scope .mcp.json has no way to
 # supply an OAuth client secret — github-mcp does not authenticate without one.
@@ -19,8 +23,6 @@
 # Usage: install-mcp-servers.sh [path/to/mcp-servers.json]
 set -uo pipefail
 
-TEMPLATE="${1:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/mcp-servers.json}"
-
 for tool in claude jq; do
     if ! command -v "$tool" >/dev/null 2>&1; then
         echo "install-mcp-servers: $tool is not on PATH — nothing installed." >&2
@@ -28,31 +30,64 @@ for tool in claude jq; do
     fi
 done
 
+# readlink -f so the default still resolves when the script is reached through a
+# symlink, the way this repo's tooling is normally installed.
+SELF="$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || printf '%s' "${BASH_SOURCE[0]}")"
+TEMPLATE="${1:-$(cd "$(dirname "$SELF")/.." && pwd)/mcp-servers.json}"
+
 if [ ! -f "$TEMPLATE" ]; then
     echo "install-mcp-servers: no template at $TEMPLATE — nothing installed." >&2
     exit 1
 fi
-REPO="$(cd "$(dirname "$TEMPLATE")" && pwd)"
 
-# Claude Code applies these settings files to its own sessions but never exports
-# them to a shell, so a value sitting in settings.local.json is invisible to
-# `${VAR}` here and has to be read out with jq. settings.local.json comes first
-# because it is gitignored in every repo, which makes it the one safe place for
-# a secret. A real environment variable still wins over all of them.
-SETTINGS_FILES=(
-    "$REPO/.claude/settings.local.json"
-    "$REPO/.claude/settings.json"
+# Where the ${VAR} values come from, best first. These are relative to the
+# working directory, not to the template: run the script from the repo whose
+# secrets should be used. settings.local.json leads because it is gitignored in
+# every repo, which makes it the one safe place for a token. A real environment
+# variable still wins over all of them.
+SOURCES=(
+    "$PWD/.claude/settings.local.json"
+    "$PWD/.claude/settings.json"
+    "$PWD/.env"
     "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.json"
 )
+
+found_source=""
+for file in "${SOURCES[@]}"; do
+    [ -f "$file" ] && found_source=1 && break
+done
+if [ -z "$found_source" ]; then
+    echo "install-mcp-servers: none of these exist under $PWD:" >&2
+    printf 'install-mcp-servers:   %s\n' "${SOURCES[@]}" >&2
+    echo "install-mcp-servers:   Every placeholder will resolve to its default or empty." >&2
+fi
+
+# read_env_file <file> <VAR> — last assignment wins, `export` and surrounding
+# quotes are tolerated. The file is parsed, never sourced.
+read_env_file() {
+    local file="$1" var="$2" line val
+    line="$(grep -E "^[[:space:]]*(export[[:space:]]+)?${var}=" "$file" 2>/dev/null | tail -n 1)"
+    [ -n "$line" ] || return 1
+    val="${line#*=}"
+    val="${val%"${val##*[![:space:]]}"}"
+    case "$val" in
+        '"'*'"') val="${val#\"}"; val="${val%\"}" ;;
+        "'"*"'") val="${val#\'}"; val="${val%\'}" ;;
+    esac
+    printf '%s' "$val"
+}
 
 # lookup <VAR_NAME> — prints the value and returns 0, or returns 1 if unset.
 lookup() {
     local var="$1" val file
     val="${!var:-}"
     if [ -n "$val" ]; then printf '%s' "$val"; return 0; fi
-    for file in "${SETTINGS_FILES[@]}"; do
+    for file in "${SOURCES[@]}"; do
         [ -f "$file" ] || continue
-        val="$(jq -r --arg v "$var" '.env[$v] // empty' "$file" 2>/dev/null)"
+        case "$file" in
+            *.json) val="$(jq -r --arg v "$var" '.env[$v] // empty' "$file" 2>/dev/null)" ;;
+            *)      val="$(read_env_file "$file" "$var")" ;;
+        esac
         if [ -n "$val" ]; then printf '%s' "$val"; return 0; fi
     done
     return 1
@@ -101,7 +136,7 @@ while read -r name; do
         if ! secret="$(lookup "$var")"; then
             secret=""
             echo "install-mcp-servers: $name authenticates over OAuth but $var is unset" >&2
-            echo "install-mcp-servers:   in the environment or any settings env block." >&2
+            echo "install-mcp-servers:   in the environment, any settings env block, or .env." >&2
             echo "install-mcp-servers:   Installing without it — the server will not authorize." >&2
         fi
     fi
