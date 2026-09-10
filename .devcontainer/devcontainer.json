@@ -21,8 +21,6 @@
 				"dnut.rewrap-revived"
 			],
 			"settings": {
-				"chat.mcp.gallery.enabled": true,
-				"chat.mcp.autostart": "newAndOutdated",
 				"dev.containers.copyGitConfig": true,
 				"[markdown]": {
 					"editor.rulers": [
@@ -38,6 +36,9 @@
 	},
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
+	"remoteEnv": {
+		"CLAUDE_CONFIG_DIR": "/workspaces/.claude"
+	},
 	// Runs once, at container creation. Installs are here, not in postAttach.
 	"postCreateCommand": "./.devcontainer/post-create.sh",
 	"postAttachCommand": "./.devcontainer/setup.sh"
