@@ -9,7 +9,7 @@ description: >
   explicit approval.
 metadata:
   author: llm-tooling
-  version: 2.0.1
+  version: 2.1.0
 ---
 
 # Open a Pull Request
@@ -26,9 +26,8 @@ Take these from the user's request when present; otherwise use the default:
 | Title | Derived from the change; a single-commit branch may use its subject |
 | Base branch | The repo's default branch |
 | Labels, reviewers, assignees | None |
-| Motivation, tickets, focus areas | Inferred from commits and diff |
 
-Anything the user supplies wins over what you infer, including their framing of *why* the change exists. Supplement it with detail from the code; do not second-guess it.
+What the user supplies wins over what you infer, including their framing of *why* the change exists. Supplement it from the code; do not second-guess it.
 
 ## GitHub Access
 
@@ -49,39 +48,26 @@ Then wait. `gh` is used **only** on explicit approval in this session, and appro
 
 ## Understand the Change
 
-Read `CLAUDE.md` (and what it imports), `README.md`, and any roadmap file **before** the diff. That is what lets the description say how the change fits the project rather than restating the diff.
+Read `CLAUDE.md` (and what it imports), `README.md`, and any roadmap file **before** the diff — that ordering is what lets the description say how the change fits the project instead of restating the diff.
 
-Then read the changed files for surrounding context and cluster the changes into the conceptual groups a reviewer would form. On a branch touching more than 50 files, cover the significant groups and summarize the mechanical ones in a line.
+Then read the changed files for surrounding context and cluster the changes into the conceptual groups a reviewer would form. Past ~50 files, cover the significant groups and give the mechanical ones a line.
 
 ## Write the Description
 
-```markdown
-<One-sentence headline of what this PR accomplishes.>
+A reviewer reads this once, before the diff, to learn what the branch does and why. Everything past that has to earn its space.
 
-## Why
+Lead with a one-sentence headline of what the PR accomplishes — what it makes possible, not the title reworded — then the why: the goal it serves, not the local trigger. Add more only where a reviewer would otherwise have to reconstruct it from the diff:
 
-<2-5 sentences placing the change in the project — the goal or roadmap item it serves, not just the local trigger.>
+- **What changed**, grouped by concept, when the branch spans more than one group and the headline cannot carry it.
+- **A decision** a reviewer would otherwise reverse-engineer: the choice and the goal it serves. Not the alternatives considered or the paths abandoned.
+- **How to review** — reading order, what deserves scrutiny, what can be skimmed — on a branch big enough to get lost in. Not a test plan; CI is the correctness gate.
 
-## What Changed
+Use `##` headings only once there are several of these to separate. A few paragraphs need none.
 
-### <Conceptual group>
-
-<What this group accomplishes. Not which files were edited.>
-
-## Key Decisions
-
-<Only for a non-obvious final choice a reviewer would otherwise have to reverse-engineer: the decision and the goal it serves, a sentence or two. Never the alternatives considered or paths abandoned. Omit the section when the diff is the obvious implementation of the stated motivation.>
-
-## How to Review
-
-<Reading order, what deserves scrutiny, what can be skimmed. Not a test plan and not a checklist — CI is the correctness gate.>
-```
-
-- **Lead with intent.** The diff already shows the mechanics.
-- **Group by concept, not by file,** and never enumerate changed files.
-- **Describe, do not review.** No critiques, no bug reports, no suggested improvements.
-- **Scannable in under two minutes.** Drop any section you have nothing real to put in.
-- Link tickets and issues in prose where they belong.
+- **Length tracks the change.** A one-concept branch is a headline and two or three sentences. Padding to fill out a shape is the failure to avoid.
+- **Lead with intent, and never enumerate changed files.** The diff has the mechanics.
+- Prose and register follow `.claude/rules/general-rules.md`.
+- Link tickets and issues inline, where the prose refers to them.
 
 ## Confirm, Then Open
 
