@@ -2,9 +2,10 @@
 # Runs once, when the container is created — not on restart or attach.
 #
 # uv itself comes from the devcontainer feature. This installs the Claude Code
-# CLI, then pre-fetches the stdio MCP servers pinned in .mcp.json, so the first
-# Claude Code session does not stall on a cold download, and so a bad pin shows
-# up now rather than as a silent server failure later.
+# CLI, installs the MCP servers from mcp-servers.json, then pre-fetches the
+# stdio servers it pins, so the first Claude Code session does not stall on a
+# cold download, and so a bad pin shows up now rather than as a silent server
+# failure later.
 #
 # Nothing here aborts container creation: a failed install is worth a loud
 # message, not an unusable container.
@@ -26,6 +27,12 @@ else
     echo "post-create:   curl -fsSL https://claude.ai/install.sh | bash -s stable" >&2
 fi
 
+# The installer put claude in ~/.local/bin, which a bare postCreate shell does
+# not have on PATH yet.
+export PATH="$HOME/.local/bin:$PATH"
+"$(dirname "${BASH_SOURCE[0]}")/../scripts/install-mcp-servers.sh" || \
+    echo "post-create: some MCP servers did not install; see above." >&2
+
 PINS=(
     "mcp-proxy-for-aws-cli==1.6.5"
     "mcp-atlassian@0.23.1"
@@ -33,7 +40,7 @@ PINS=(
 
 if ! command -v uvx >/dev/null 2>&1; then
     echo "post-create: uvx not on PATH — the uv devcontainer feature did not install." >&2
-    echo "post-create: stdio MCP servers in .mcp.json will not start until it does." >&2
+    echo "post-create: stdio MCP servers in mcp-servers.json will not start until it does." >&2
     exit 0
 fi
 

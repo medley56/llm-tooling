@@ -84,11 +84,38 @@ Open a PR for this branch as a draft, and put @alice on it.
 
 Rules need no invocation. A rule with `paths:` loads when Claude reads a file matching its globs; one without loads every session.
 
+### MCP Servers
+
+[mcp-servers.json](mcp-servers.json) is a **template**, not a config Claude Code
+loads. Install the servers it describes into user scope, so they are available in
+every repo on the machine:
+
+```bash
+./scripts/install-mcp-servers.sh
+```
+
+It is not named `.mcp.json` on purpose: a project-scope `.mcp.json` has no way to
+pass an OAuth client secret, and `github-mcp` will not authenticate without one.
+Re-run the script after editing the template — nothing picks the edit up on its
+own.
+
+Values for the template's `${VAR}` placeholders go in the `env` block of
+`.claude/settings.local.json`, which is gitignored in every repo and so is the
+one safe place for a token. The script reads that file directly, because Claude
+applies the block to its own sessions but never exports it to a shell.
+
+It substitutes every placeholder before calling the CLI. Claude Code expands
+`${VAR}` only for a project-scope `.mcp.json`; a user-scope server keeps the
+literal string it was installed with, which surfaces as a 404 against a URL
+containing `${GITHUB_MCP_CLIENT_ID}`. The installed config therefore holds real
+tokens in cleartext. It lives in `~/.claude.json` (or `$CLAUDE_CONFIG_DIR`),
+outside any repo, but do not share it.
+
 ### GitHub Access
 
 The PR skills and agents use the **GitHub MCP server**, not the `gh` CLI. If MCP is unavailable they stop and tell you — usually a stale auth token, and refreshing it is the fastest fix. They will use `gh` only if you explicitly say so, and they will not troubleshoot `gh` for you.
 
-Their tool references are `mcp__github-mcp__*`, matching the `github-mcp` entry in this repo's [.mcp.json](.mcp.json), which authenticates over OAuth against a personal GitHub App — set `GITHUB_MCP_CLIENT_ID` to that app's client ID and give the app a callback URL on port 7878 to match `callbackPort`, then authorize once with `/mcp`. **A server registered under a different name will not resolve those tools** — either register it as `github-mcp`, or update the `tools:` lists in `agents/` and the `ToolSearch` selectors in `skills/`.
+Their tool references are `mcp__github-mcp__*`, matching the `github-mcp` entry in [mcp-servers.json](mcp-servers.json), which authenticates over OAuth against a personal GitHub App. Put `GITHUB_MCP_CLIENT_ID` and `GITHUB_MCP_CLIENT_SECRET` in the `env` block of `.claude/settings.local.json`, give the app a callback URL on port 7878 to match `callbackPort`, run the install script, then authorize once with `/mcp`. **A server registered under a different name will not resolve those tools** — either register it as `github-mcp`, or update the `tools:` lists in `agents/` and the `ToolSearch` selectors in `skills/`.
 
 ---
 
