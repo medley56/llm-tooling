@@ -10,8 +10,17 @@ notification, next to the code. Write for that moment.
 
 ## Substance
 
-- Answer three things: what is wrong, why it matters, and what to do instead. A
-  comment that stops after the first is a complaint, not a review.
+- Every comment names what is wrong, where, and why it matters. What comes
+  after that depends on the fix:
+  - **Prescriptive** — only when the fix is simple, obvious, and objectively
+    correct. State it in three sentences or less, then the motivation as
+    briefly as it can be said.
+  - **Problem statement** — everything else. Describe the problem precisely
+    and leave the solution to the author; at most one sentence of possible
+    high-level approach. Designing a complex fix during review spends the
+    author's attention on a plan they did not choose.
+- Long reasoning invites the author to reject the whole finding over one wrong
+  step. Cut every detail the finding does not rest on.
 - Anchor to the code you mean — file, line, identifier, branch. Never "error
   handling could be improved".
 - Do not restate what the diff already shows. Tell the author something they do
@@ -27,10 +36,8 @@ notification, next to the code. Write for that moment.
 
 - Use a bulleted or numbered list when a comment makes several related or
   sequential points; prose for a single point.
-- Include a concrete code snippet when requesting a specific change to a small,
-  unambiguous section of code.
-- Use short pseudocode when the request spans many lines — enough to convey the
-  shape, not an implementation.
+- A code snippet either shows a prescriptive fix in place or points at the
+  problem. It is never a sketch of a solution the author has not chosen.
 - Link external documentation when it is the evidence for the critique.
 
 Vague and specific, on the same finding:

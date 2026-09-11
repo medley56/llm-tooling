@@ -9,7 +9,7 @@ description: >
   server; falls back to the gh CLI only with the user's explicit approval.
 metadata:
   author: llm-tooling
-  version: 3.0.1
+  version: 3.1.0
 ---
 
 # PR Review
@@ -59,7 +59,7 @@ For each finding:
 
 - **Anchor** — `path`, `line`, `side` (`RIGHT` for added or context lines, `LEFT` for removed); `start_line`/`line` for a contiguous range. A line outside a hunk cannot be inline: mark it top-level and say why.
 - **One comment per finding.** A concept spanning several files anchors at the most important location and references the rest as `path:line` in the body.
-- **Body** — the issue, why it matters, and what to do instead. Include a ```suggestion block only when the fix is a small, unambiguous, in-place edit on the commented lines. Read `comment-style.md` in this skill directory before drafting the first body.
+- **Body** — read `comment-style.md` in this skill directory before drafting the first one. It decides whether a finding is prescriptive or a problem statement, which is the main judgment call here. Include a ```suggestion block only when the fix is a small, unambiguous, in-place edit on the commented lines.
 - **Disposition** — `include` by default; `propose-drop` for nitpicks and duplicates.
 
 Also draft the **review summary body**: two to four sentences of overall assessment plus a severity tally.
@@ -76,7 +76,7 @@ Show the working set as a compact table:
 4   nitpick     src/api/routes.py:12          propose-drop  Import ordering
 ```
 
-Then the summary body. Take free-form direction and act on it: drop and restore comments, rewrite or retone a body, change a severity, re-anchor between locations or to top-level, split a broad finding, merge overlapping ones, add a comment the document did not contain, or explain the reasoning behind one. Read the code at a location before writing a new comment about it.
+Then the summary body. Take free-form direction and act on it: drop and restore comments, rewrite or retone a body, change a severity, re-anchor between locations or to top-level, split a broad finding, merge overlapping ones, convert a prescriptive comment into a problem statement or back, add a comment the document did not contain, or explain the reasoning behind one. Read the code at a location before writing a new comment about it.
 
 Show the updated table after each round until the user says they are done. Reach for `AskUserQuestion` only when a decision genuinely blocks.
 
