@@ -10,7 +10,7 @@ description: >
   falls back to the gh CLI only with the user's explicit approval.
 metadata:
   author: llm-tooling
-  version: 1.0.3
+  version: 1.1.0
 ---
 
 # PR Fix
@@ -25,7 +25,7 @@ From the user's request: the PR identifier (number, URL, or branch — otherwise
 
 One option changes the shape of the workflow:
 
-- **Plan review** — **on by default.** Step 5 stops for the user to approve the plan before any code is touched. Turn it off only when they say so explicitly at invocation — "don't make me review the plan", "just apply the fixes", "skip the gate". Not mentioning it is not permission, and neither is a plan that looks obvious.
+- **Plan review** — **on by default.** Step 6 stops for the user to approve the plan before any code is touched. Turn it off only when they say so explicitly at invocation — "don't make me review the plan", "just apply the fixes", "skip the gate". Not mentioning it is not permission, and neither is a plan that looks obvious.
 
 ## 2. GitHub Access
 
@@ -47,13 +47,21 @@ Record owner, repo, number, head and base branch, head SHA, and author. If no PR
 - **Uncommitted changes** — if the tree is dirty, say what is uncommitted and ask whether to proceed. Your commits should contain the fixes, not whatever was already in progress.
 - **The remote may have moved.** `git fetch origin <head>`; if the remote branch is ahead, the author pushed since you last looked. Pull before anything else.
 
-## 4. Plan the Response
+## 4. Rebase onto the Base Branch
+
+The base branch may have moved while the review sat. `git fetch origin <base>`; if the head branch is behind, rebase it onto `origin/<base>`. Conflicts stop the skill — report the files and hand them to the user rather than resolving or `--skip`ping them.
+
+**Do not push the rebase.** Step 10 pushes it together with the fixes.
+
+## 5. Plan the Response
 
 Invoke the **github-pr-fix-planner** agent with the PR identifier and the context from step 1. It fetches every unresolved comment, reads the code around each one, applies the repo's conventions, and returns a plan sorting comments into **Clear Actions**, **Discussion-Only**, and **Needs Clarification**.
 
+If step 4 rebased, say so — the comment line numbers it reads from GitHub may not match the local files.
+
 Always invoke it — never fetch and triage comments by hand.
 
-## 5. Review the Plan With the User — Default Gate
+## 6. Review the Plan With the User — Default Gate
 
 **The user approves the plan before implementation begins**, unless they explicitly waived the gate in step 1.
 
@@ -75,7 +83,7 @@ Keep going until the user says the dispositions are right. **Nothing is implemen
 
 If the gate was waived, still print the table before starting so the user can interrupt, then proceed with the planner's dispositions. Where you disagree with one, say so in a line rather than silently implementing it.
 
-## 6. Implement
+## 7. Implement
 
 Work one thread at a time, in table order, so each change stays traceable to the comment that prompted it. Follow the conventions the planner surfaced.
 
@@ -83,29 +91,29 @@ Change only what the comment calls for. A reviewer asking for a rename has not a
 
 If a fix turns out to be wrong, impossible, or much larger than the plan implied, stop and say so. That comment goes back to the user for a new disposition.
 
-## 7. Verify
+## 8. Verify
 
 Run the tests and linters the repo's instruction files or config name, not a guess. In a Python repo, use the **pytest-runner** agent. Run the full suite unless it is prohibitively slow, in which case run everything touching the changed code and say what you skipped.
 
 **Failures block the push.** Report them with output. Fix what your changes caused; for a failure that predates them, say so, show the evidence, and let the user decide whether to proceed.
 
-## 8. Review the Diff
+## 9. Review the Diff
 
 Show `git diff` grouped by the thread each hunk answers, so the user can check the response against the request. Call out anything you changed that no comment asked for, and why.
 
-Get explicit approval before committing. If the user wants changes, go back to step 6.
+Get explicit approval before committing. If the user wants changes, go back to step 7.
 
-## 9. Commit and Push
+## 10. Commit and Push
 
 Commit the approved work — one commit per thread when the fixes are independent, a single commit when they are one coherent change. Use the repo's existing message style. Describe what changed, not that a reviewer asked for it.
 
-Then push to the PR's head branch. **Never force-push** — it destroys the review history the reviewer is working from and can drop their commits. Never push to the base branch.
+Then push to the PR's head branch. Where step 4 rebased it, the push is not a fast-forward: say so, get an explicit yes, and use `--force-with-lease`, which refuses if the remote moved since you fetched. **Never plain `--force`**, and never push to the base branch.
 
-If the push is rejected as non-fast-forward, the author pushed while you worked. Stop and let the user choose how to reconcile — do not rebase, merge, or force anything on your own.
+If the push is rejected anyway, the author pushed while you worked. Stop and let the user choose how to reconcile — do not rebase, merge, or force anything on your own.
 
 Report the pushed commit SHAs.
 
-## 10. Reply on Each Thread
+## 11. Reply on Each Thread
 
 Every dispositioned comment gets a reply on its own thread, so the reviewer sees the response in context. A reply is a PR comment: read `.claude/skills/pr-review/comment-style.md` before drafting replies, and open each one with the attribution header it defines.
 
@@ -119,12 +127,12 @@ Do not resolve threads — that is the reviewer's call. Offer it only if the use
 
 If a reply fails to post, report which thread and why, and keep the remaining replies going.
 
-## 11. Report
+## 12. Report
 
 Give the pushed SHAs, the count of threads fixed, replied, and declined, and any comment left unaddressed with the reason. Note whether the suite passed at the pushed commit.
 
 ## Rules
 
 - **The user decides what gets fixed.** No code change and no reply happens without their say-so.
-- **Never force-push, and never push to the base branch.**
+- **Never plain `--force`, and never push to the base branch.** `--force-with-lease` after the step 4 rebase, with the user's yes, is the only force.
 - **Never claim a fix you did not verify.** "Fixed in abc123" is a factual claim about tested code.

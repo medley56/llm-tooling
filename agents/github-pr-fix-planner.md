@@ -86,7 +86,7 @@ Fetch inline review comments (path, line, body) and top-level review summaries. 
 
 For each unresolved comment:
 
-1. **Read the referenced file** and at least ±20 lines around the commented line.
+1. **Read the referenced file** and at least ±20 lines around the commented line. If the caller says the branch was rebased since the review, find the code the comment quotes rather than trusting its line number.
 2. **Understand the reviewer's intent**, including any code suggestion, instruction, or linked documentation.
 3. **Classify the type**: **bug fix** (incorrect behavior), **style/refactor** (formatting, naming, organization), **logic change** (different behavior or algorithm), **question/clarification** (asking, not requesting — plan a response, not a code change), or **documentation** (docs, comments, type annotations).
 4. **Assess clarity**, independently of type:
