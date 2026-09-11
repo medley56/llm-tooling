@@ -9,7 +9,7 @@ description: >
   explicit approval.
 metadata:
   author: llm-tooling
-  version: 2.1.0
+  version: 2.2.0
 ---
 
 # Open a Pull Request
@@ -51,6 +51,12 @@ Then wait. `gh` is used **only** on explicit approval in this session, and appro
 Read `CLAUDE.md` (and what it imports), `README.md`, and any roadmap file **before** the diff — that ordering is what lets the description say how the change fits the project instead of restating the diff.
 
 Then read the changed files for surrounding context and cluster the changes into the conceptual groups a reviewer would form. Past ~50 files, cover the significant groups and give the mechanical ones a line.
+
+## Changelog and Version
+
+Infer from what exists (`CHANGELOG.md`, `.changeset/`, `changelog.d/`; the version in `pyproject.toml`, `package.json`, `Cargo.toml`) and what comparable merges touched whether this branch owes an entry or a bump. Where release tooling — release-please, changesets, towncrier — generates them, nothing is owed.
+
+If one is owed and missing, name it and offer to add it in the existing format before opening the PR. Never edit those files silently. Nothing to infer from, nothing to say.
 
 ## Write the Description
 

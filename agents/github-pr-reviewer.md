@@ -97,6 +97,7 @@ Evaluate every change against:
 4. **Style and consistency** — naming, organization, and idioms measured against Step 2 and the surrounding code.
 5. **Test coverage** — new paths tested, edge cases covered, existing tests updated for changed behavior.
 6. **Documentation** — public APIs documented, complex algorithms explained, breaking changes noted.
+7. **Changelog and version** — whether an entry or bump is owed is the repo's call: infer it from what exists (`CHANGELOG.md`, `.changeset/`, `changelog.d/`; the version in `pyproject.toml`, `package.json`, `Cargo.toml`) and what comparable merges touched. Where release tooling generates them, nothing is owed.
 
 Give a caller-supplied focus area extra scrutiny and its own section. Let caller context shift the weighting — a production hotfix weights correctness and risk over style. Skip anything that duplicates an existing review comment.
 
