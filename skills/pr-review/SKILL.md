@@ -9,7 +9,7 @@ description: >
   server; falls back to the gh CLI only with the user's explicit approval.
 metadata:
   author: llm-tooling
-  version: 3.1.0
+  version: 3.1.2
 ---
 
 # PR Review
@@ -86,15 +86,7 @@ Before leaving the loop, re-validate every included anchor against the diff.
 
 ## 7. Attribution and Verdict
 
-Every posted comment — each inline one and the summary — begins with a single attribution line, then a blank line, then the body:
-
-```
-🤖 AI-assisted comment, reviewed and approved by @<github-login> before posting.
-
-<comment body>
-```
-
-The login is the person submitting, who is accountable for the content. Apply it to every comment, including ones the user wrote themselves, and never stack it twice. They may reword it but may not remove the attribution or the 🤖 — posting AI-assisted comments as if they were unassisted misrepresents their provenance. If asked to drop it, decline briefly and offer to reword.
+Every posted comment — each inline one and the summary — carries the attribution header defined in `comment-style.md`, including comments the user wrote themselves.
 
 Then ask for the verdict unless the user already stated one. Recommend based on the final severity mix, but they decide:
 

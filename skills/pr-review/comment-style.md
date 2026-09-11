@@ -49,5 +49,15 @@ Vague and specific, on the same finding:
 
 ## Attribution
 
-Posted comments and replies carry the attribution header defined in
-[SKILL.md](SKILL.md), which is the single source of truth for its wording.
+Every posted comment and reply opens with this line, then a blank line, then
+the body:
+
+```
+🤖 _AI-assisted comment, reviewed and approved by @<github-login> before posting._
+```
+
+The login is the person submitting, who is accountable for the content. Apply
+it to every comment, including ones the user wrote themselves, and never stack
+it twice. They may reword it but may not remove the attribution or the 🤖 —
+posting AI-assisted comments as if they were unassisted misrepresents their
+provenance. If asked to drop it, decline briefly and offer to reword.

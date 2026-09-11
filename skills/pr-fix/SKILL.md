@@ -10,7 +10,7 @@ description: >
   falls back to the gh CLI only with the user's explicit approval.
 metadata:
   author: llm-tooling
-  version: 1.0.1
+  version: 1.0.3
 ---
 
 # PR Fix
@@ -107,15 +107,7 @@ Report the pushed commit SHAs.
 
 ## 10. Reply on Each Thread
 
-Every dispositioned comment gets a reply on its own thread, so the reviewer sees the response in context. Each reply opens with the attribution line, then a blank line, then the body:
-
-```
-🤖 AI-assisted comment, reviewed and approved by @<github-login> before posting.
-
-<reply body>
-```
-
-A reply is a PR comment and holds to the same bar: read `.claude/skills/pr-review/comment-style.md` before drafting replies.
+Every dispositioned comment gets a reply on its own thread, so the reviewer sees the response in context. A reply is a PR comment: read `.claude/skills/pr-review/comment-style.md` before drafting replies, and open each one with the attribution header it defines.
 
 - **Fixed** — what changed and where, with the commit SHA. Not "done."
 - **Reply** — the answer, at the length the question deserves.
