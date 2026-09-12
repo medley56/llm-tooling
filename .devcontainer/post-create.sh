@@ -2,10 +2,9 @@
 # Runs once, when the container is created — not on restart or attach.
 #
 # uv itself comes from the devcontainer feature. This installs the Claude Code
-# CLI, installs the MCP servers from mcp-servers.json, then pre-fetches the
-# stdio servers it pins, so the first Claude Code session does not stall on a
-# cold download, and so a bad pin shows up now rather than as a silent server
-# failure later.
+# CLI, runs install.sh, then pre-fetches the stdio MCP servers the template
+# pins, so the first Claude Code session does not stall on a cold download, and
+# so a bad pin shows up now rather than as a silent server failure later.
 #
 # Nothing here aborts container creation: a failed install is worth a loud
 # message, not an unusable container.
@@ -20,9 +19,12 @@ git config commit.gpgsign true ||
 # user — no Node, no root-owned npm prefix, so `claude update` works without
 # sudo. Never run it under sudo; it would install into root's home instead.
 #
-# It may warn here that ~/.local/bin is not on PATH. Ignore it: postCreate runs
-# a bare shell, but /etc/zsh/zshrc and ~/.profile in the base image both add
-# that directory, so `claude` resolves in a real shell.
+# install.sh deliberately does not do this: provisioning the CLI belongs to
+# whatever provisions the machine, which here is this hook.
+#
+# It may warn that ~/.local/bin is not on PATH. Ignore it: postCreate runs a
+# bare shell, but /etc/zsh/zshrc and ~/.profile in the base image both add that
+# directory, so `claude` resolves in a real shell.
 if command -v claude >/dev/null 2>&1; then
     echo "post-create: claude already present ($(claude --version 2>/dev/null))"
 elif curl -fsSL https://claude.ai/install.sh | bash -s stable; then
@@ -35,8 +37,14 @@ fi
 # The installer put claude in ~/.local/bin, which a bare postCreate shell does
 # not have on PATH yet.
 export PATH="$HOME/.local/bin:$PATH"
-"$(dirname "${BASH_SOURCE[0]}")/../scripts/install-mcp-servers.sh" || \
-    echo "post-create: some MCP servers did not install; see above." >&2
+
+# This repo develops the tooling it ships, so it links its own skills, agents,
+# and rules into ./.claude rather than copying them into the config dir — an
+# edit is live immediately, with one copy of every file. Other repos install at
+# user scope instead; see the README.
+"$(dirname "${BASH_SOURCE[0]}")/../install.sh" --yes --scope project --link \
+    --target "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)" ||
+    echo "post-create: some tooling did not install; see above." >&2
 
 PINS=(
     "mcp-proxy-for-aws-cli==1.6.5"

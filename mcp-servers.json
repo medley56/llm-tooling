@@ -1,46 +1,85 @@
 {
-    "mcpServers": {
-        "github-mcp": {
-            "type": "http",
-            "url": "https://api.githubcopilot.com/mcp/x/all",
-            "oauth": {
-                "clientId": "${GITHUB_MCP_CLIENT_ID}",
-                "callbackPort": 7878
-            }
-        },
-        "aws-mcp": {
-            "command": "uvx",
-            "args": [
-                "mcp-proxy-for-aws-cli==1.6.5",
-                "https://aws-mcp.us-east-1.api.aws/mcp",
-                "--metadata",
-                "AWS_REGION=us-west-2"
-            ],
-            "env": {
-                "AWS_MCP_PROXY_PROFILES": "${AWS_MCP_PROXY_PROFILES:-dev-sc-aws-mcp stage-sc-aws-mcp prod-sc-aws-mcp}"
+    "about": [
+        "Templates for creating MCP server configs. This is NOT a .mcp.json, and Claude Code never loads it.",
+        "Each entry's `config` is the JSON handed to `claude mcp add-json`. Everything outside `config` drives the installer and never reaches the CLI.",
+        "${VAR} and ${VAR:-default} are substituted before install. Edits here change nothing until ./install.sh runs again.",
+        "`prompts` supplies the label the installer uses when it has to ask for a variable."
+    ],
+    "prompts": {
+        "GITHUB_MCP_CLIENT_SECRET": "GitHub App client secret",
+        "GITHUB_MCP_PAT": "GitHub personal access token (scopes: repo, read:org)",
+        "DMZ_JIRA_PAT": "Jira personal access token",
+        "DMZ_CONFLUENCE_PAT": "Confluence personal access token"
+    },
+    "servers": [
+        {
+            "name": "github-mcp",
+            "description": "GitHub: pull requests, issues, code search",
+            "clientSecretVar": "GITHUB_MCP_CLIENT_SECRET",
+            "config": {
+                "type": "http",
+                "url": "https://api.githubcopilot.com/mcp/x/all",
+                "oauth": {
+                    "clientId": "${GITHUB_MCP_CLIENT_ID}",
+                    "callbackPort": 7878
+                }
             },
-            "timeout": 100000,
-            "transport": "stdio"
-        },
-        "atlassian-mcp": {
-            "command": "uvx",
-            "args": [
-                "mcp-atlassian@0.23.1"
-            ],
-            "env": {
-                "JIRA_URL": "${DMZ_JIRA_URL}",
-                "JIRA_PERSONAL_TOKEN": "${DMZ_JIRA_PAT}",
-                "READ_ONLY_MODE": "${ATLASSIAN_READ_ONLY_MODE:-true}",
-                "TOOLSETS": "default,jira_agile,jira_projects",
-                "JIRA_PROJECTS_FILTER": "${PROJECTS_FILTER}",
-                "CONFLUENCE_URL": "${DMZ_CONFLUENCE_URL}",
-                "CONFLUENCE_PERSONAL_TOKEN": "${DMZ_CONFLUENCE_PAT}",
-                "CONFLUENCE_SPACES_FILTER": "${SPACES_FILTER}"
+            "fallback": {
+                "description": "authenticate with a personal access token instead of the OAuth app",
+                "requires": "GITHUB_MCP_PAT",
+                "config": {
+                    "type": "http",
+                    "url": "https://api.githubcopilot.com/mcp/x/all",
+                    "headers": {
+                        "Authorization": "Bearer ${GITHUB_MCP_PAT}"
+                    }
+                }
             }
         },
-        "notion-mcp": {
-            "type": "http",
-            "url": "https://mcp.notion.com/mcp"
+        {
+            "name": "aws-mcp",
+            "description": "AWS CLI over MCP",
+            "config": {
+                "command": "uvx",
+                "args": [
+                    "mcp-proxy-for-aws-cli==1.6.5",
+                    "https://aws-mcp.us-east-1.api.aws/mcp",
+                    "--metadata",
+                    "AWS_REGION=us-west-2"
+                ],
+                "env": {
+                    "AWS_MCP_PROXY_PROFILES": "${AWS_MCP_PROXY_PROFILES:-dev-sc-aws-mcp stage-sc-aws-mcp prod-sc-aws-mcp}"
+                },
+                "timeout": 100000
+            }
+        },
+        {
+            "name": "atlassian-mcp",
+            "description": "Jira and Confluence",
+            "config": {
+                "command": "uvx",
+                "args": [
+                    "mcp-atlassian@0.23.1"
+                ],
+                "env": {
+                    "JIRA_URL": "${DMZ_JIRA_URL}",
+                    "JIRA_PERSONAL_TOKEN": "${DMZ_JIRA_PAT}",
+                    "READ_ONLY_MODE": "${ATLASSIAN_READ_ONLY_MODE:-true}",
+                    "TOOLSETS": "default,jira_agile,jira_projects",
+                    "JIRA_PROJECTS_FILTER": "${PROJECTS_FILTER}",
+                    "CONFLUENCE_URL": "${DMZ_CONFLUENCE_URL}",
+                    "CONFLUENCE_PERSONAL_TOKEN": "${DMZ_CONFLUENCE_PAT}",
+                    "CONFLUENCE_SPACES_FILTER": "${SPACES_FILTER}"
+                }
+            }
+        },
+        {
+            "name": "notion-mcp",
+            "description": "Notion workspace",
+            "config": {
+                "type": "http",
+                "url": "https://mcp.notion.com/mcp"
+            }
         }
-    }
+    ]
 }

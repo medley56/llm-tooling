@@ -45,31 +45,110 @@ Rules are topic-scoped instructions Claude Code loads from `.claude/rules/`. A r
 
 ## Installation
 
-Claude Code discovers skills, agents, and rules under `.claude/` in the repository you are working in. Clone this repo somewhere permanent, then link the pieces you want into the target repo:
+Clone the repo, then run the installer from it:
 
 ```bash
 git clone https://github.com/medley56/llm-tooling.git ~/src/llm-tooling
-
-cd /path/to/your-project
-mkdir -p .claude
-ln -s ~/src/llm-tooling/skills .claude/skills
-ln -s ~/src/llm-tooling/agents .claude/agents
-ln -s ~/src/llm-tooling/rules  .claude/rules
+~/src/llm-tooling/install.sh
 ```
 
-Symlinking the whole directory means `git pull` in the clone updates every project at once. To take only some of it, link individual entries instead:
+It walks you through which components to install and how each MCP server should
+authenticate. `--yes` runs it straight through with no questions, which is what
+a container hook wants; it also switches to that mode on its own when there is
+no tty, or when `CI=true`.
 
-```bash
-ln -s ~/src/llm-tooling/skills/commit .claude/skills/commit
+Everything installs at **user scope**, into `$CLAUDE_CONFIG_DIR` (default
+`~/.claude`), so every repo on the machine picks it up:
+
+```
+$CLAUDE_CONFIG_DIR/skills/    copied from skills/
+$CLAUDE_CONFIG_DIR/agents/    copied from agents/
+$CLAUDE_CONFIG_DIR/rules/     copied from rules/
+$CLAUDE_CONFIG_DIR/.claude.json   MCP servers, via `claude mcp add-json`
 ```
 
-Add `.claude/skills`, `.claude/agents`, and `.claude/rules` to the project's `.gitignore` if your team does not all use these tools.
+User scope is not just convenience for rules. A `.claude/rules/` symlink whose
+target sits outside the working directory counts as an external import: it needs
+per-project approval, and even then only rules *without* a `paths:` field load —
+which would silently drop [test-suite-factoring](rules/test-suite-factoring.md).
+Rules in `$CLAUDE_CONFIG_DIR/rules/` have neither problem.
+
+It does **not** install the Claude Code CLI. That belongs to whatever provisions
+the machine.
+
+### What it does to what is already there
+
+**Skills, agents, and rules are mirrored — upstream always wins.** The component
+directory is replaced wholesale on every run, so an upstream edit or deletion
+always lands. Nothing is destroyed quietly, though: before replacing, anything
+that would be lost is moved to
+`$CLAUDE_CONFIG_DIR/llm-tooling-backups/<timestamp>/` and named in a warning.
+That covers both entries this repo does not have (deleted upstream, renamed, or
+hand-created) and entries it does have whose content you changed locally.
+Backups older than 30 days are pruned; `--keep-backups DAYS` changes that.
+
+`--no-backup` skips the moving, not the warning — you still get told what was
+overwritten, it just is not kept. Use it when the config dir is disposable.
+
+**MCP servers are left alone when nothing changed.** Each server's expanded
+config is compared against what is already installed, along with its stored
+client secret. If both match, the server is skipped entirely.
+
+That check matters more than it looks: `claude mcp remove` deletes the server's
+stored *authorization* along with the server, and installing over an existing
+name requires removing it first. Without the check, a hook that runs on every
+container start would make you re-authorize every OAuth server every start.
+`--force` reinstalls regardless, and costs exactly that re-authorization.
+
+A consequence worth knowing when editing [mcp-servers.json](mcp-servers.json):
+the comparison is strict, and `claude mcp add-json` silently discards some keys —
+`transport` on a stdio server, for one. A key the CLI drops can never compare
+equal, so the server would reinstall on every run. Leave such keys out.
+
+### Useful flags
+
+```
+--components LIST     skills, agents, rules, mcp (default: all)
+--scope project       put skills/agents/rules in ./.claude instead of the config
+                      dir; MCP servers are always user scope either way
+--link                symlink components instead of copying them
+--mcp-servers LIST    only these servers
+--auth NAME=MODE      force one server's auth: primary, fallback, or skip
+--secrets-from DIR    repo to read ${VAR} values from
+--no-backup           overwrite components without keeping a backup
+--force               reinstall MCP servers even when nothing changed
+--dry-run             report every action, change nothing
+--doctor              report what is currently installed, change nothing
+```
+
+`--help` lists all of them.
 
 ### Updating
 
 ```bash
-cd ~/src/llm-tooling && git pull
+~/src/llm-tooling/install.sh --update
 ```
+
+`--update` fetches and hard-resets the checkout to `origin/main`, then re-runs
+itself. Without it, `git pull` in the clone followed by a plain run does the
+same thing in two steps.
+
+### In a devcontainer
+
+Put this in a **postStart** hook, so the first start installs and every start
+after that updates:
+
+```bash
+LLM_TOOLING_DIR="${LLM_TOOLING_DIR:-/workspaces/llm-tooling}"
+[ -d "$LLM_TOOLING_DIR/.git" ] ||
+    git clone -q --depth 1 git@github.com:medley56/llm-tooling.git "$LLM_TOOLING_DIR" ||
+    echo "WARNING: Could not clone llm-tooling - Is your SSH agent forwarded?"
+bash "$LLM_TOOLING_DIR/install.sh" --yes --update ||
+    echo "WARNING: llm-tooling install failed - Tooling may be missing or stale"
+```
+
+Nothing the installer does aborts the caller: a tooling problem is a loud
+message, not a container that will not come up.
 
 ---
 
@@ -86,55 +165,108 @@ Rules need no invocation. A rule with `paths:` loads when Claude reads a file ma
 
 ### MCP Servers
 
-[mcp-servers.json](mcp-servers.json) is a **template**, not a config Claude Code
-loads. Install the servers it describes into user scope, so they are available in
-every repo on the machine:
+[mcp-servers.json](mcp-servers.json) is a **template for creating MCP configs**,
+not a config Claude Code loads. Each entry's `config` is the JSON handed to
+`claude mcp add-json`; every key outside `config` drives the installer and is
+stripped before the CLI sees it. Editing it changes nothing until `install.sh`
+runs again.
+
+It is not a `.mcp.json` on purpose: a project-scope `.mcp.json` has no way to
+pass an OAuth client secret, and `github-mcp` will not authenticate without one.
+Installing through the CLI is the only path that can hand one over.
+
+To install only the servers:
 
 ```bash
-./scripts/install-mcp-servers.sh
+./install.sh --components mcp
 ```
 
-It is not named `.mcp.json` on purpose: a project-scope `.mcp.json` has no way to
-pass an OAuth client secret, and `github-mcp` will not authenticate without one.
-Re-run the script after editing the template — nothing picks the edit up on its
-own.
+They always go to **user scope**, regardless of `--scope`: a project-scope
+server lives in a `.mcp.json`, which cannot carry an OAuth client secret, and
+`--scope project` is about where skills, agents, and rules land. So running the
+project-scope variant alongside an existing user-scope install neither removes
+those servers nor duplicates them — it compares and skips them.
 
-Values for the template's `${VAR}` placeholders are read from the **current
-directory**, not from wherever the template lives — run the script from the repo
-whose secrets it should use. It looks at, best first:
+#### Where ${VAR} values come from
+
+Best first. A real environment variable beats every file:
 
 ```
 <the environment>
-$PWD/.claude/settings.local.json    env block
-$PWD/.claude/settings.json          env block
-$PWD/.env                           KEY=value, `export` and quotes allowed
-$CLAUDE_CONFIG_DIR/settings.json    env block
+$CLAUDE_CONFIG_DIR/settings.json            env block
+<--secrets-from>/.claude/settings.local.json  env block
+<--secrets-from>/.claude/settings.json        env block
+<--secrets-from>/.env                         KEY=value, `export` and quotes allowed
 ```
 
-Prefer `.claude/settings.local.json`: it is gitignored in every repo, which
-makes it the one safe place for a token. The script parses these files rather
-than relying on the environment because its main caller, a devcontainer
-`postCreate` hook, runs before any Claude session exists and so has none of
-these variables set.
+`--secrets-from` defaults to the working directory, so by default the repo you
+are standing in supplies the values. At user scope the config dir is checked
+first, so a stale token left in some repo cannot shadow the real one. A
+project-scope install (`--scope project`) reverses those two.
 
-It substitutes every placeholder before calling the CLI. Claude Code expands
-`${VAR}` only for a project-scope `.mcp.json`; a user-scope server keeps the
-literal string it was installed with, which surfaces as a 404 against a URL
-containing `${GITHUB_MCP_CLIENT_ID}`. The installed config therefore holds real
-tokens in cleartext. It lives in `~/.claude.json` (or `$CLAUDE_CONFIG_DIR`),
-outside any repo, but do not share it.
+`.env` files are parsed, never sourced. The installer reads files rather than
+trusting the environment because its main caller is a container hook, which runs
+before any Claude session exists and has none of these variables set.
+
+Prefer `.claude/settings.local.json` for a per-repo secret: it is gitignored
+everywhere. An interactive run offers to save anything it has to ask for —
+into `$CLAUDE_CONFIG_DIR/settings.json` at user scope, into
+`.claude/settings.local.json` at project scope, and it refuses to write there if
+the path is not actually gitignored.
+
+#### Placeholders are substituted before install
+
+Claude Code expands `${VAR}` only for a project-scope `.mcp.json`. A user-scope
+server keeps the literal string it was installed with, which surfaces as a 404
+against a URL containing `${GITHUB_MCP_CLIENT_ID}`. The installer therefore
+substitutes real values first, which means **the installed config holds tokens in
+cleartext**. It lives in `$CLAUDE_CONFIG_DIR/.claude.json`, outside any repo, but
+do not share it.
+
+`claude mcp add-json` also type-checks numeric fields, so `callbackPort` has to
+be a literal number — even `"7878"` is rejected as `Invalid configuration`.
 
 ### GitHub Access
 
-The PR skills and agents use the **GitHub MCP server**, not the `gh` CLI. If MCP is unavailable they stop and tell you — usually a stale auth token, and refreshing it is the fastest fix. They will use `gh` only if you explicitly say so, and they will not troubleshoot `gh` for you.
+The PR skills and agents use the **GitHub MCP server**, not the `gh` CLI. If MCP
+is unavailable they stop and tell you — usually a stale auth token, and
+refreshing it is the fastest fix. They will use `gh` only if you explicitly say
+so, and they will not troubleshoot `gh` for you.
 
-Their tool references are `mcp__github-mcp__*`, matching the `github-mcp` entry in [mcp-servers.json](mcp-servers.json), which authenticates over OAuth against a personal GitHub App. Put `GITHUB_MCP_CLIENT_ID` and `GITHUB_MCP_CLIENT_SECRET` in the `env` block of `.claude/settings.local.json`, give the app a callback URL on port 7878 to match `callbackPort`, run the install script, then authorize once with `/mcp`. **A server registered under a different name will not resolve those tools** — either register it as `github-mcp`, or update the `tools:` lists in `agents/` and the `ToolSearch` selectors in `skills/`.
+Their tool references are `mcp__github-mcp__*`, matching the `github-mcp` entry
+in [mcp-servers.json](mcp-servers.json). **A server registered under a different
+name will not resolve those tools** — either register it as `github-mcp`, or
+update the `tools:` lists in `agents/` and the `ToolSearch` selectors in
+`skills/`.
+
+It authenticates two ways, and keeps the name `github-mcp` either way:
+
+**OAuth against a personal GitHub App** (the default). Put
+`GITHUB_MCP_CLIENT_ID` and `GITHUB_MCP_CLIENT_SECRET` where the installer will
+find them, give the app a callback URL on port 7878 to match `callbackPort`, run
+the installer, then authorize once with `/mcp`.
+
+**A personal access token**, if the client secret is missing. An interactive run
+offers this as a choice; a non-interactive one takes it automatically when
+`GITHUB_MCP_PAT` resolves and the client secret does not. Force it either way
+with `--auth github-mcp=fallback`. Setting an `Authorization` header disables
+OAuth for that server, so it is one mode or the other, never both.
+
+This is the template's generic `fallback` mechanism, not a GitHub special case:
+any server can declare a `fallback` with the variable it `requires` and the
+`config` to use instead. A server whose `requires` variable stays unset is
+skipped rather than installed broken.
 
 ---
 
 ## Developing These Tools
 
-This repo links its own tooling into `.claude/`, so the skills, agents, and rules are live while you work on them:
+This repo develops the tooling it ships, so it installs its own components at
+**project** scope as symlinks rather than copying them into the config dir:
+
+```bash
+./install.sh --yes --scope project --link --target .
+```
 
 ```
 .claude/skills -> ../skills
@@ -142,9 +274,17 @@ This repo links its own tooling into `.claude/`, so the skills, agents, and rule
 .claude/rules  -> ../rules
 ```
 
-Edits take effect immediately — there is one copy of each file, and `.claude/` is only a view onto it. Start a new session to pick up frontmatter changes.
+Edits take effect immediately — there is one copy of each file, and `.claude/` is
+only a view onto it. Start a new session to pick up frontmatter changes.
+[.devcontainer/post-create.sh](.devcontainer/post-create.sh) runs that command at
+container creation, installs `uv` as a feature, and pre-fetches the pinned stdio
+MCP servers.
 
-The devcontainer installs `uv` as a feature and pre-fetches the pinned stdio MCP servers in [.devcontainer/post-create.sh](.devcontainer/post-create.sh), which runs at container creation only.
+The installer itself is `install.sh` plus four sourced modules in
+[scripts/lib/](scripts/lib/): `ui.sh` (output and prompting), `env.sh`
+(placeholder resolution and secret storage), `sync.sh` (component mirroring), and
+`mcp.sh` (server installation). Its only dependencies are `bash`, `jq`, `git`,
+and the `claude` CLI.
 
 ### New Skill
 
