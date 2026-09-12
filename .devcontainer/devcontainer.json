@@ -39,7 +39,6 @@
 	"remoteEnv": {
 		"CLAUDE_CONFIG_DIR": "/workspaces/.claude"
 	},
-	// Runs once, at container creation. Installs are here, not in postAttach.
-	"postCreateCommand": "./.devcontainer/post-create.sh",
-	"postAttachCommand": "./.devcontainer/setup.sh"
+	// Runs once, at container creation. The only lifecycle hook.
+	"postCreateCommand": "./.devcontainer/post-create.sh"
 }

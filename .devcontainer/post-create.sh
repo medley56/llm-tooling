@@ -11,6 +11,11 @@
 # message, not an unusable container.
 set -uo pipefail
 
+# Signing is opt in per container: the host gitconfig carries the key but leaves
+# commit.gpgsign off. Local scope is the point — do not promote it to --global.
+git config commit.gpgsign true ||
+    echo "post-create: could not enable commit signing." >&2
+
 # The native installer drops a standalone binary in ~/.local/bin as the current
 # user — no Node, no root-owned npm prefix, so `claude update` works without
 # sudo. Never run it under sudo; it would install into root's home instead.
