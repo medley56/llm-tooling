@@ -68,6 +68,11 @@ Options:
 USAGE
 }
 
+# The option loop below consumes $@, so --update's re-exec has nothing left
+# to pass on. Capture the arguments first: a dropped --dry-run installs for
+# real, and a dropped --config-dir installs somewhere else entirely.
+declare -a ARGV=("$@")
+
 while [ $# -gt 0 ]; do
     case "$1" in
         -y | --yes) INTERACTIVE=0 ;;
@@ -133,7 +138,7 @@ if [ "$UPDATE" = 1 ] && [ -z "${LLM_TOOLING_UPDATED:-}" ]; then
     fi
     finished
     export LLM_TOOLING_UPDATED=1
-    exec bash "$SELF" "$@"
+    exec bash "$SELF" "${ARGV[@]}"
 fi
 
 [ -n "$SECRETS_FROM" ] || SECRETS_FROM="$TARGET"

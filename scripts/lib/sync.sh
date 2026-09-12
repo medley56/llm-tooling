@@ -78,11 +78,18 @@ sync_component() {
         return 0
     fi
 
-    # Guarded because the next line is an rm -rf built from two variables.
+    # Guarded because the replace below is an rm -rf built from two variables.
     if [ -z "$DEST_ROOT" ] || [ -z "$type" ]; then
         warn "refusing to replace $dest - empty path component"
         return 1
     fi
+
+    # cp -R needs the parent to exist; on a fresh machine the config dir does not.
+    mkdir -p "$DEST_ROOT" || {
+        warn "could not create $DEST_ROOT"
+        return 1
+    }
+
     rm -rf "$dest" && cp -R "$src" "$dest" || {
         warn "could not install $type into $dest"
         return 1
