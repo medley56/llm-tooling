@@ -29,4 +29,4 @@ Every file here is a prompt for a Claude 5-generation model, so [the rules of co
 ## Conventions These Files Share
 
 - **GitHub work goes through the MCP server.** The `gh` CLI is used only when the user explicitly approves it, per run. On MCP failure, tools stop, report, and name a stale auth token as the likely cause — they never troubleshoot `gh` or drag the user into a CLI debugging session.
-- **PR comment conventions live in `skills/pr-review/comment-style.md`**, the 🤖 attribution header included. The pr-review and pr-fix skills and the github-pr-reviewer agent point at it rather than restating it.
+- **PR comment conventions live in `skills/pr-review/comment-style.md`**, the severity badges and the 🤖 attribution line included. The pr-review and pr-fix skills and the github-pr-reviewer agent point at it rather than restating it.

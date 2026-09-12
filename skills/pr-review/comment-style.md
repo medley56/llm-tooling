@@ -47,10 +47,35 @@ Vague and specific, on the same finding:
 > Specific: "This query has no LIMIT. On the production `events` table (~40M
 > rows) it will scan the whole table on every request."
 
+## Severity Line
+
+A finding comment opens with its severity badge and a headline, then a blank
+line, then the body:
+
+```
+🛑 `CRITICAL` — expired tokens return `None` into a `str` caller
+```
+
+The headline is often the only line an author reads in a notification, so it
+says what is wrong, not what the category is. Keep it under about ten words,
+and let the body pick up where it stops rather than restate it.
+
+These four levels are the whole vocabulary, and the github-pr-reviewer agent
+assigns one to every finding:
+
+- critical — 🛑 `CRITICAL`
+- warning — ⚠️ `WARNING`
+- suggestion — 💡 `SUGGESTION`
+- nitpick — ✏️ `NITPICK`
+
+Anything labeled outside those four maps to the nearest one; never invent a
+badge. Only a finding gets a severity line — a review summary, which tallies
+the severities, and a reply on an existing thread do not.
+
 ## Attribution
 
-Every posted comment and reply opens with this line, then a blank line, then
-the body:
+Every posted comment and reply ends with this line, after a blank line
+following the body:
 
 ```
 🤖 _AI-assisted comment, reviewed and approved by @<github-login> before posting._

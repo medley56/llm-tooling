@@ -9,7 +9,7 @@ description: >
   server; falls back to the gh CLI only with the user's explicit approval.
 metadata:
   author: llm-tooling
-  version: 3.1.2
+  version: 3.2.0
 ---
 
 # PR Review
@@ -45,7 +45,7 @@ Record owner, repo, number, head and base branch, head SHA, and author. If no PR
 
 **Always invoke the github-pr-reviewer agent.** Never hand-write findings, and never let a review document stand in for running it — the agent reads the PR from GitHub rather than from whatever is on disk.
 
-Pass it the PR identifier, focus area, and context from step 1. It writes `pr-<number>-review.md`: findings organized by concept, each with a severity of `critical`, `warning`, `suggestion`, or `nitpick`. Wait for it, then read its output.
+Pass it the PR identifier, focus area, and context from step 1. It writes `pr-<number>-review.md`: findings organized by concept, each carrying one of the four severities `comment-style.md` defines. Wait for it, then read its output.
 
 A review document the user supplied is **input, not a substitute**: read it, pass its substance to the agent as context, warn that their file will be regenerated, and merge findings the agent did not independently reach into the working list, marked as theirs.
 
@@ -59,7 +59,7 @@ For each finding:
 
 - **Anchor** — `path`, `line`, `side` (`RIGHT` for added or context lines, `LEFT` for removed); `start_line`/`line` for a contiguous range. A line outside a hunk cannot be inline: mark it top-level and say why.
 - **One comment per finding.** A concept spanning several files anchors at the most important location and references the rest as `path:line` in the body.
-- **Body** — read `comment-style.md` in this skill directory before drafting the first one. It decides whether a finding is prescriptive or a problem statement, which is the main judgment call here. Include a ```suggestion block only when the fix is a small, unambiguous, in-place edit on the commented lines.
+- **Body** — read `comment-style.md` in this skill directory before drafting the first one. It gives the severity line a finding opens with and the attribution that closes every comment, and decides whether a finding is prescriptive or a problem statement, which is the main judgment call here. Include a ```suggestion block only when the fix is a small, unambiguous, in-place edit on the commented lines.
 - **Disposition** — `include` by default; `propose-drop` for nitpicks and duplicates.
 
 Also draft the **review summary body**: two to four sentences of overall assessment plus a severity tally.
@@ -69,7 +69,7 @@ Also draft the **review summary body**: two to four sentences of overall assessm
 Show the working set as a compact table:
 
 ```
-#   Severity    Location                      Disposition   Summary
+#   Severity    Location                      Disposition   Headline
 1   critical    src/auth/tokens.py:48         include       Expired tokens return None but caller assumes str
 2   warning     src/api/routes.py:112-130     include       Unbounded query in the list endpoint
 3   suggestion  (top-level)                   include       Test coverage gap for the refresh path
@@ -86,7 +86,7 @@ Before leaving the loop, re-validate every included anchor against the diff.
 
 ## 7. Attribution and Verdict
 
-Every posted comment — each inline one and the summary — carries the attribution header defined in `comment-style.md`, including comments the user wrote themselves.
+Every posted comment — each inline one and the summary — ends with the attribution line defined in `comment-style.md`, comments the user wrote themselves included.
 
 Then ask for the verdict unless the user already stated one. Recommend based on the final severity mix, but they decide:
 
@@ -96,7 +96,7 @@ Then ask for the verdict unless the user already stated one. Recommend based on 
 
 ## 8. Confirm
 
-Show exactly what will be posted: the verdict, the full summary body with its header, every inline comment as `path:line` plus final text, and the count — "N inline comments + 1 summary, submitted as \<VERDICT\> on PR #\<number\> in \<owner\>/\<repo\>."
+Show exactly what will be posted: the verdict, the full summary body, every inline comment as `path:line` plus final text, and the count — "N inline comments + 1 summary, submitted as \<VERDICT\> on PR #\<number\> in \<owner\>/\<repo\>."
 
 **Do not post without an unambiguous yes.** Silence, an ambiguous reply, or an unrelated one means do not post. If the user declines, leave the draft file and tell them re-running the skill resumes from it.
 
