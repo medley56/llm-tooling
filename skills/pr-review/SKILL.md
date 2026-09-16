@@ -28,7 +28,7 @@ Do this **before any other work** — never put a user who cannot post through a
 
 If MCP cannot be resolved or reached, stop. Do not diagnose it, and do not fall back on your own:
 
-> GitHub MCP is unavailable — <the error, verbatim>. This is usually a stale MCP auth token; refreshing it is the fastest fix. If you would rather run this review through the `gh` CLI, say so and I will use it.
+> GitHub MCP is unavailable — <the error, verbatim>. `ToolSearch` finding nothing for every query means no GitHub MCP server is connected; one that resolves but errors is usually a stale auth token, and refreshing it is the fastest fix. If you would rather run this review through the `gh` CLI, say so and I will use it.
 
 Then wait. `gh` is used **only** on explicit approval in this session, and approval does not carry to a later run. If `gh` is missing or unauthenticated, say so in one line, name `gh auth login`, and stop.
 

@@ -233,10 +233,11 @@ is unavailable they stop and tell you — usually a stale auth token, and
 refreshing it is the fastest fix. They will use `gh` only if you explicitly say
 so, and they will not troubleshoot `gh` for you.
 
-They grant `mcp__github*`, so a server registered as either `github` or
-`github-mcp` resolves — [mcp-servers.json](mcp-servers.json) installs it under
-`github-mcp`. **A name that does not start with `github` will not resolve those
-tools**, and the `tools:` lists in `agents/` would have to change with it.
+The agents allowlist twelve read-only tools under both the `mcp__github__` and
+`mcp__github-mcp__` prefixes, so a server registered under either name resolves
+— [mcp-servers.json](mcp-servers.json) installs it as `github-mcp`. **Under any
+other name nothing resolves**, and the agent then reports the server as
+unavailable; add that prefix to the `tools:` lists in `agents/` to fix it.
 
 It authenticates two ways, and keeps the name `github-mcp` either way:
 

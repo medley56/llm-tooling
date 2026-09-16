@@ -17,7 +17,30 @@ tools:
   - ToolSearch
   - ListMcpResourcesTool
   - ReadMcpResourceTool
-  - mcp__github*
+  - mcp__github__get_me
+  - mcp__github__get_commit
+  - mcp__github__get_file_contents
+  - mcp__github__list_branches
+  - mcp__github__list_commits
+  - mcp__github__list_pull_requests
+  - mcp__github__pull_request_read
+  - mcp__github__search_pull_requests
+  - mcp__github__search_issues
+  - mcp__github__issue_read
+  - mcp__github__list_issues
+  - mcp__github__search_code
+  - mcp__github-mcp__get_me
+  - mcp__github-mcp__get_commit
+  - mcp__github-mcp__get_file_contents
+  - mcp__github-mcp__list_branches
+  - mcp__github-mcp__list_commits
+  - mcp__github-mcp__list_pull_requests
+  - mcp__github-mcp__pull_request_read
+  - mcp__github-mcp__search_pull_requests
+  - mcp__github-mcp__search_issues
+  - mcp__github-mcp__issue_read
+  - mcp__github-mcp__list_issues
+  - mcp__github-mcp__search_code
 model: inherit
 ---
 
@@ -54,7 +77,7 @@ The frontmatter `tools:` allowlist grants the GitHub MCP tools this job needs; i
 
 If MCP tools cannot be resolved or reached and the caller did not authorize `gh`, **stop immediately**. Do not review from local git state alone, and never fabricate PR metadata or comments. Return this and end:
 
-> **GitHub MCP server unavailable.** This agent could not reach the GitHub MCP server tools required to read PR data: <the error, verbatim>. This is usually a stale MCP auth token; refreshing it is the fastest fix. Do not troubleshoot this from the agent side. If the user would rather run the review through the `gh` CLI, re-invoke this agent with explicit authorization to use it.
+> **GitHub MCP server unavailable.** This agent could not reach the GitHub MCP server tools required to read PR data: <the error, verbatim>. `ToolSearch` finding nothing for every query means the server is registered under a name this agent's `tools:` allowlist does not cover — say that, not a token problem. A server that resolves but errors is usually a stale auth token. Do not troubleshoot this from the agent side. If the user would rather run the review through the `gh` CLI, re-invoke this agent with explicit authorization to use it.
 
 ## Step 4: Resolve the PR and Verify Branch State
 
