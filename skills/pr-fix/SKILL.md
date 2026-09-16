@@ -29,7 +29,7 @@ One option changes the shape of the workflow:
 
 ## 2. GitHub Access
 
-Resolve the MCP tools with `ToolSearch` — `select:mcp__github-mcp__pull_request_read,mcp__github-mcp__get_me`, plus a keyword search like `github pull request review comment reply` for the reply side. Names vary by server version. Call `mcp__github-mcp__get_me` to confirm the server answers and to record the user's login for attribution.
+Resolve the MCP tools with `ToolSearch` keyword searches — `+github pull request read` and `+github get me`, plus `+github pull request review comment reply` for the reply side. The `+github` prefix matches whether the server is registered as `github` or `github-mcp`. Names vary by server version. Call `get_me` to confirm the server answers and to record the user's login for attribution.
 
 Do this **before any other work** — a user whose replies cannot be posted should know before anything is implemented.
 

@@ -18,18 +18,7 @@ tools:
   - ToolSearch
   - ListMcpResourcesTool
   - ReadMcpResourceTool
-  - mcp__github-mcp__get_me
-  - mcp__github-mcp__get_commit
-  - mcp__github-mcp__get_file_contents
-  - mcp__github-mcp__list_branches
-  - mcp__github-mcp__list_commits
-  - mcp__github-mcp__list_pull_requests
-  - mcp__github-mcp__pull_request_read
-  - mcp__github-mcp__search_pull_requests
-  - mcp__github-mcp__search_issues
-  - mcp__github-mcp__issue_read
-  - mcp__github-mcp__list_issues
-  - mcp__github-mcp__search_code
+  - mcp__github*
 model: inherit
 ---
 
@@ -58,7 +47,7 @@ Where instructions conflict, prefer the more specific file.
 
 ## Step 3: GitHub Tool Access
 
-The frontmatter `tools:` allowlist grants the GitHub MCP tools this job needs; invoke them directly. **Prefer MCP for every GitHub operation.** Use `ToolSearch` with `select:mcp__github-mcp__<name>` for a schema, or `ListMcpResourcesTool` to see what the server exposes.
+The frontmatter `tools:` allowlist grants the GitHub MCP tools this job needs; invoke them directly. **Prefer MCP for every GitHub operation.** Resolve schemas with a `ToolSearch` keyword search — `+github <what you need>`, which matches whether the server is registered as `github` or `github-mcp` — or `ListMcpResourcesTool` to see what the server exposes.
 
 **If the caller explicitly authorized the `gh` CLI**, you may use it when MCP is unavailable. Absent that, do not reach for it — you run without a user present, so the choice is not yours.
 
