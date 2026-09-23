@@ -2,7 +2,7 @@
 name: pr-create
 description: >
   Writes a reviewer-focused description for the current branch and opens the
-  pull request on GitHub. Invoked as /pr-create, or when the user asks to "open
+  pull request on GitHub. Invoked as /llm-tooling:pr-create, or when the user asks to "open
   a PR", "put up a PR", "create a pull request", or "write a PR description".
   Accepts draft status, title, base branch, labels, reviewers, and assignees.
   Uses the GitHub MCP server; falls back to the gh CLI only with the user's

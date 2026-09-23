@@ -5,7 +5,7 @@ description: >
   unresolved comments, runs the github-pr-fix-planner agent to plan a response
   to each one, walks the user through them, implements the approved fixes,
   verifies and reviews the result, pushes, and replies on each comment thread.
-  Invoked as /pr-fix, or when the user asks to "address review comments", "fix
+  Invoked as /llm-tooling:pr-fix, or when the user asks to "address review comments", "fix
   the PR feedback", or "respond to my reviewer". Uses the GitHub MCP server;
   falls back to the gh CLI only with the user's explicit approval.
 metadata:
@@ -115,7 +115,7 @@ Report the pushed commit SHAs.
 
 ## 11. Reply on Each Thread
 
-Every dispositioned comment gets a reply on its own thread, so the reviewer sees the response in context. A reply is a PR comment: read `.claude/skills/pr-review/comment-style.md` before drafting replies, and end each one with the attribution line it defines. A reply carries no severity line.
+Every dispositioned comment gets a reply on its own thread, so the reviewer sees the response in context. A reply is a PR comment: read `${CLAUDE_SKILL_DIR}/../pr-review/comment-style.md` before drafting replies, and end each one with the attribution line it defines. A reply carries no severity line.
 
 - **Fixed** — what changed and where, with the commit SHA. Not "done."
 - **Reply** — the answer, at the length the question deserves.

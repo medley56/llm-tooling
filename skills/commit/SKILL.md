@@ -2,7 +2,7 @@
 name: commit
 description: >
   Decides what in the working tree belongs in a commit, writes a Conventional
-  Commits message, and creates the commit locally. Invoked as /commit, or when
+  Commits message, and creates the commit locally. Invoked as /llm-tooling:commit, or when
   the user asks to "commit this", "commit my changes", or "write a commit
   message". Excludes review and planning artifacts, and asks when the right
   contents are unclear. Never pushes.
@@ -73,4 +73,4 @@ Use `-F`, never `-m` — `-m` mangles multi-line bodies and breaks on quotes and
 
 Report the short SHA and branch. **Never push**, and never amend unless asked for an amend by name.
 
-If the commit fails, the run ends there. Report what happened, leave the message on screen, and tell the user to re-run `/commit` once they have looked at the state. Never retry with `--no-verify` — the hook is the repo objecting. If a hook reformatted files, show what it rewrote.
+If the commit fails, the run ends there. Report what happened, leave the message on screen, and tell the user to re-run `/llm-tooling:commit` once they have looked at the state. Never retry with `--no-verify` — the hook is the repo objecting. If a hook reformatted files, show what it rewrote.

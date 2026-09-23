@@ -124,7 +124,7 @@ Findings are organized by **concept, not by file**; one finding may span several
 - **suggestion** — a real improvement, not blocking.
 - **nitpick** — style or preference. Optional.
 
-Finding prose is what the calling session turns into posted PR comments, where these four names render as severity badges — never rename one or add a level. If `.claude/skills/pr-review/comment-style.md` exists, read it and hold every finding to it.
+Finding prose is what the calling session turns into posted PR comments, where these four names render as severity badges — never rename one or add a level. If the caller passes the path of a `comment-style.md`, read it and hold every finding to it.
 
 ```
 # Code Review: PR #<number> — <title>

@@ -211,6 +211,11 @@ install_mcp() {
     local -a names=()
     mapfile -t names < <(server_names)
 
+    for w in "${MCP_ONLY[@]}"; do
+        printf '%s\n' "${names[@]}" | grep -qxF -- "$w" ||
+            { warn "no server named $w in $TEMPLATE"; failed=1; }
+    done
+
     for name in "${names[@]}"; do
         [ -n "$name" ] || continue
         if [ "$MCP_FILTERED" = 1 ]; then
@@ -230,7 +235,7 @@ install_mcp() {
 
 # installed_config <name> — the config currently installed at user scope.
 installed_config() {
-    jq -c --arg n "$1" '.mcpServers[$n] // empty' "$CONFIG_DIR/.claude.json" 2>/dev/null
+    jq -c --arg n "$1" '.mcpServers[$n] // empty' "$GLOBAL_CONFIG" 2>/dev/null
 }
 
 # installed_secret <name> — the client secret registered for it, if any. The

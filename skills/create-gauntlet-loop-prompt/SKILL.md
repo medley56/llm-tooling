@@ -141,7 +141,7 @@ Whichever is chosen, the prompt must forbid stopping because output is "good eno
 
 ### Step 9: Assemble the prompt
 
-Read `assets/prompt-template.md` (relative to this skill's directory) and fill it in from Steps 1–8. Consult `assets/examples.md` for greenfield and brownfield worked examples if you need calibration.
+Read `${CLAUDE_SKILL_DIR}/assets/prompt-template.md` and fill it in from Steps 1–8. Consult `${CLAUDE_SKILL_DIR}/assets/examples.md` for greenfield and brownfield worked examples if you need calibration.
 
 Keep the loop mechanics intact — they are what make this a gauntlet loop rather than a long feature request:
 

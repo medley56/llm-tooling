@@ -2,9 +2,10 @@
 # Runs once, when the container is created — not on restart or attach.
 #
 # uv itself comes from the devcontainer feature. This installs the Claude Code
-# CLI, runs install.sh, then pre-fetches the stdio MCP servers the template
-# pins, so the first Claude Code session does not stall on a cold download, and
-# so a bad pin shows up now rather than as a silent server failure later.
+# CLI, runs install.sh, registers this checkout as the plugin marketplace, then
+# pre-fetches the stdio MCP servers the template pins, so the first Claude Code
+# session does not stall on a cold download, and so a bad pin shows up now
+# rather than as a silent server failure later.
 #
 # Nothing here aborts container creation: a failed install is worth a loud
 # message, not an unusable container.
@@ -38,13 +39,20 @@ fi
 # not have on PATH yet.
 export PATH="$HOME/.local/bin:$PATH"
 
-# This repo develops the tooling it ships, so it links its own skills, agents,
-# and rules into ./.claude rather than copying them into the config dir — an
-# edit is live immediately, with one copy of every file. Other repos install at
-# user scope instead; see the README.
-"$(dirname "${BASH_SOURCE[0]}")/../install.sh" --yes --scope project --link \
-    --target "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)" ||
-    echo "post-create: some tooling did not install; see above." >&2
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+"$REPO/install.sh" --yes --scope project --target "$REPO" ||
+    echo "post-create: some MCP servers did not install; see above." >&2
+
+# This repo develops the plugin it ships, so it registers the checkout itself as
+# the marketplace. A marketplace added from a local directory loads its plugins
+# in place, so an edit is live in the next session. Both commands are no-ops
+# once done. Rules need nothing: .claude/rules is a tracked symlink to rules/.
+if command -v claude >/dev/null 2>&1; then
+    claude plugin marketplace add "$REPO" &&
+        claude plugin install llm-tooling@llm-tooling ||
+        echo "post-create: the llm-tooling plugin did not install; see above." >&2
+fi
 
 PINS=(
     "mcp-proxy-for-aws-cli==1.6.5"

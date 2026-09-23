@@ -10,6 +10,6 @@ SELF="$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || printf '%s' "${BASH_SOURC
 SRC="$(cd "$(dirname "$SELF")/.." && pwd)"
 
 if [ $# -gt 0 ]; then
-    exec bash "$SRC/install.sh" --yes --components mcp --template "$1"
+    exec bash "$SRC/install.sh" --yes --template "$1"
 fi
-exec bash "$SRC/install.sh" --yes --components mcp
+exec bash "$SRC/install.sh" --yes

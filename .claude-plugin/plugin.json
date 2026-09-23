@@ -1,0 +1,9 @@
+{
+  "name": "llm-tooling",
+  "description": "Skills and sub-agents for committing, opening, reviewing, and fixing pull requests, planning and implementing changes, running pytest, auditing a repo's LLM instructions, and building presentations and Gauntlet Loop prompts.",
+  "author": {
+    "name": "Gavin Medley",
+    "email": "gavin.medley@lasp.colorado.edu"
+  },
+  "homepage": "https://github.com/medley56/llm-tooling"
+}

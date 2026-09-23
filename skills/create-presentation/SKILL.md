@@ -95,7 +95,7 @@ Suggest reordering, combining related slides, splitting dense ones, or changing 
 
 ## Step 3: Generate HTML
 
-1. Read the template at `assets/template.html` (relative to this skill's directory).
+1. Read the template at `${CLAUDE_SKILL_DIR}/assets/template.html`.
 2. Fill in `{{TITLE}}`, `{{AUTHOR}}`, `{{DATE}}`, `{{THEME}}`.
 3. Generate a `<section>` per approved slide using the patterns below.
 4. Add `class="fragment"` only where the Fragment Rules allow.

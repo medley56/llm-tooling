@@ -23,8 +23,8 @@ Two things are audited, and both matter: **accuracy** (does the text still match
 
 **Claude Code**
 - `**/CLAUDE.md`, `**/CLAUDE.local.md` — at any directory level
-- `.claude/agents/*.md`, `agents/*.md`
-- `.claude/skills/**/SKILL.md`, `skills/**/SKILL.md`
+- `.claude/agents/*.md`, `agents/*.md`, `plugins/*/agents/**/*.md`
+- `.claude/skills/**/SKILL.md`, `skills/**/SKILL.md`, `plugins/*/skills/**/SKILL.md`, and `.claude-plugin/*.json` manifests
 - `.claude/rules/**/*.md`, `rules/**/*.md` — a rule with `paths:` loads only when a matching file is read; one without loads every session
 - `.claude/settings.json`, `.claude/settings.local.json` — may encode behavioral rules
 - `.claude/commands/**/*.md` — superseded by skills; a repo carrying both may have duplicates

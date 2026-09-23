@@ -14,11 +14,11 @@ Skills are user-facing workflows, invoked by name as a slash command or matched 
 
 | Skill | Description |
 |---|---|
-| [commit](skills/commit/) | `/commit` — works out what in the tree belongs in the commit from session context, writes a Conventional Commits message, and commits locally; never pushes |
-| [pr-create](skills/pr-create/) | `/pr-create` — writes a reviewer-focused description for the current branch and opens the pull request on GitHub, with draft, label, reviewer, and assignee options |
-| [pr-review](skills/pr-review/) | `/pr-review` — end-to-end PR review: runs the github-pr-reviewer agent, iterates with you finding-by-finding, and posts the review to GitHub with a severity badge on every finding and an AI-assistance attribution on every comment. Carries `comment-style.md`, the comment-writing conventions the pr-fix skill and reviewer agent also follow |
-| [pr-fix](skills/pr-fix/) | `/pr-fix` — end-to-end response to review feedback: rebases onto the base branch if it has moved, plans a reply to every comment, walks you through them, implements, verifies, pushes, and replies on each thread |
-| [implement-change](skills/implement-change/) | `/implement-change` — end-to-end change delivery: reads the request from a file, Jira ticket, Notion page, GitHub issue, or the prompt, runs the implementation-planner agent to draft an approach, agrees a plan with you before anything is written, implements and verifies it, offers to open the PR, and offers to archive the plan and outcome to a Notion database of implementation artifacts |
+| [commit](skills/commit/) | `/llm-tooling:commit` — works out what in the tree belongs in the commit from session context, writes a Conventional Commits message, and commits locally; never pushes |
+| [pr-create](skills/pr-create/) | `/llm-tooling:pr-create` — writes a reviewer-focused description for the current branch and opens the pull request on GitHub, with draft, label, reviewer, and assignee options |
+| [pr-review](skills/pr-review/) | `/llm-tooling:pr-review` — end-to-end PR review: runs the github-pr-reviewer agent, iterates with you finding-by-finding, and posts the review to GitHub with a severity badge on every finding and an AI-assistance attribution on every comment. Carries `comment-style.md`, the comment-writing conventions the pr-fix skill and reviewer agent also follow |
+| [pr-fix](skills/pr-fix/) | `/llm-tooling:pr-fix` — end-to-end response to review feedback: rebases onto the base branch if it has moved, plans a reply to every comment, walks you through them, implements, verifies, pushes, and replies on each thread |
+| [implement-change](skills/implement-change/) | `/llm-tooling:implement-change` — end-to-end change delivery: reads the request from a file, Jira ticket, Notion page, GitHub issue, or the prompt, runs the implementation-planner agent to draft an approach, agrees a plan with you before anything is written, implements and verifies it, offers to open the PR, and offers to archive the plan and outcome to a Notion database of implementation artifacts |
 | [create-presentation](skills/create-presentation/) | Creates a reveal.js HTML presentation from markdown, a topic description, or rough notes using the Assertion-Evidence slide design methodology |
 | [create-gauntlet-loop-prompt](skills/create-gauntlet-loop-prompt/) | Interactively builds a "Gauntlet Loop" prompt — extracts the real requirements, sets an inspectable quality bar, and emits a builder/critic loop prompt |
 
@@ -47,54 +47,90 @@ Rules are topic-scoped instructions Claude Code loads from `.claude/rules/`. A r
 
 ## Installation
 
-Clone the repo, then run the installer from it:
+Three pieces, because Claude Code plugins can carry skills and agents but not
+rules, and cannot hand an MCP server an OAuth client secret. None of the three
+installs the Claude Code CLI; that belongs to whatever provisions the machine.
+
+### Skills and agents: the plugin
+
+This repo is its own plugin marketplace, with one plugin, `llm-tooling`:
+
+```
+/plugin marketplace add medley56/llm-tooling
+/plugin install llm-tooling@llm-tooling
+```
+
+To install for everyone who works in a project, use `claude plugin install
+--scope project` from a shell. That records only `enabledPlugins`, so also run
+`claude plugin marketplace add medley56/llm-tooling --scope project`, or a
+teammate's clone has nowhere to resolve the plugin from. It writes this to the
+project's committed `.claude/settings.json`:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "llm-tooling": { "source": { "source": "github", "repo": "medley56/llm-tooling" } }
+  }
+}
+```
+
+Components are namespaced by the plugin: skills run as `/llm-tooling:commit`,
+`/llm-tooling:pr-review`, and so on, and agents load as
+`llm-tooling:github-pr-reviewer`.
+
+Auto-update is off by default for a third-party marketplace. Turn it on in
+`/plugin` → Marketplaces → llm-tooling → Enable auto-update, or update by hand
+with `/plugin marketplace update llm-tooling` and then
+`/plugin update llm-tooling@llm-tooling`.
+
+If an older version of this repo's installer put skills or agents in
+`~/.claude/skills/` or `~/.claude/agents/`, delete those entries, or every skill
+appears twice — once bare, once namespaced.
+
+### Rules: `install-rules.sh`
+
+Clone the repo, then:
 
 ```bash
 git clone https://github.com/medley56/llm-tooling.git ~/src/llm-tooling
+~/src/llm-tooling/install-rules.sh                     # user scope
+~/src/llm-tooling/install-rules.sh --scope project     # ./.claude/rules
+```
+
+At **user scope** each rule is symlinked into `$CLAUDE_CONFIG_DIR/rules/`
+(default `~/.claude/rules/`), so `git pull` in the clone updates every project.
+
+At **project scope** it symlinks only when the clone sits inside the project,
+say as a submodule, and then with a relative link that survives a commit.
+Otherwise it copies. Claude Code treats a project rule linked outside the
+working directory as an external import: it does not load until external imports
+are approved, it never asks for that approval over a symlink alone, and even
+approved, a rule with `paths:` — [test-suite-factoring](rules/test-suite-factoring.md)
+— never loads.
+
+Re-run it after pulling to pick up upstream changes: a copy it made and nobody
+has edited since is updated, and one whose rule was deleted upstream is removed.
+It records what it copied in `.claude/rules/.llm-tooling-rules`. Anything else
+that differs from upstream is kept with a warning; `--force` moves it to
+`<name>.bak-<timestamp>` and replaces it. `--dry-run` reports without changing
+anything.
+
+### MCP servers: `install.sh`
+
+```bash
 ~/src/llm-tooling/install.sh
 ```
 
-It walks you through which components to install and how each MCP server should
-authenticate. `--yes` runs it straight through with no questions, which is what
-a container hook wants; it also switches to that mode on its own when there is
-no tty, or when `CI=true`.
+It walks you through which servers to install and how each should authenticate.
+`--yes` runs it straight through with no questions, which is what a container
+hook wants; it also switches to that mode on its own when there is no tty, or
+when `CI=true`. Servers go to **user scope** via `claude mcp add-json`, in
+`~/.claude.json`, or `$CLAUDE_CONFIG_DIR/.claude.json` when that is set. See [MCP Servers](#mcp-servers) for the template and
+where secrets come from.
 
-Everything installs at **user scope**, into `$CLAUDE_CONFIG_DIR` (default
-`~/.claude`), so every repo on the machine picks it up:
-
-```
-$CLAUDE_CONFIG_DIR/skills/    copied from skills/
-$CLAUDE_CONFIG_DIR/agents/    copied from agents/
-$CLAUDE_CONFIG_DIR/rules/     copied from rules/
-$CLAUDE_CONFIG_DIR/.claude.json   MCP servers, via `claude mcp add-json`
-```
-
-User scope is not just convenience for rules. A `.claude/rules/` symlink whose
-target sits outside the working directory counts as an external import: it needs
-per-project approval, and even then only rules *without* a `paths:` field load —
-which would silently drop [test-suite-factoring](rules/test-suite-factoring.md).
-Rules in `$CLAUDE_CONFIG_DIR/rules/` have neither problem.
-
-It does **not** install the Claude Code CLI. That belongs to whatever provisions
-the machine.
-
-### What it does to what is already there
-
-**Skills, agents, and rules are mirrored — upstream always wins.** The component
-directory is replaced wholesale on every run, so an upstream edit or deletion
-always lands. Nothing is destroyed quietly, though: before replacing, anything
-that would be lost is moved to
-`$CLAUDE_CONFIG_DIR/llm-tooling-backups/<timestamp>/` and named in a warning.
-That covers both entries this repo does not have (deleted upstream, renamed, or
-hand-created) and entries it does have whose content you changed locally.
-Backups older than 30 days are pruned; `--keep-backups DAYS` changes that.
-
-`--no-backup` skips the moving, not the warning — you still get told what was
-overwritten, it just is not kept. Use it when the config dir is disposable.
-
-**MCP servers are left alone when nothing changed.** Each server's expanded
-config is compared against what is already installed, along with its stored
-client secret. If both match, the server is skipped entirely.
+**Servers are left alone when nothing changed.** Each server's expanded config is
+compared against what is already installed, along with its stored client secret.
+If both match, the server is skipped entirely.
 
 That check matters more than it looks: `claude mcp remove` deletes the server's
 stored *authorization* along with the server, and installing over an existing
@@ -107,33 +143,18 @@ the comparison is strict, and `claude mcp add-json` silently discards some keys 
 `transport` on a stdio server, for one. A key the CLI drops can never compare
 equal, so the server would reinstall on every run. Leave such keys out.
 
-### Useful flags
-
 ```
---components LIST     skills, agents, rules, mcp (default: all)
---scope project       put skills/agents/rules in ./.claude instead of the config
-                      dir; MCP servers are always user scope either way
---link                symlink components instead of copying them
 --mcp-servers LIST    only these servers
 --auth NAME=MODE      force one server's auth: primary, fallback, or skip
 --secrets-from DIR    repo to read ${VAR} values from
---no-backup           overwrite components without keeping a backup
---force               reinstall MCP servers even when nothing changed
+--scope project       save prompted secrets in the repo, and read its files first
+--force               reinstall servers even when nothing changed
+--update              hard-reset the clone to origin/main, then re-run
 --dry-run             report every action, change nothing
 --doctor              report what is currently installed, change nothing
 ```
 
 `--help` lists all of them.
-
-### Updating
-
-```bash
-~/src/llm-tooling/install.sh --update
-```
-
-`--update` fetches and hard-resets the checkout to `origin/main`, then re-runs
-itself. Without it, `git pull` in the clone followed by a plain run does the
-same thing in two steps.
 
 ### In a devcontainer
 
@@ -146,17 +167,26 @@ LLM_TOOLING_DIR="${LLM_TOOLING_DIR:-/workspaces/llm-tooling}"
     git clone -q --depth 1 git@github.com:medley56/llm-tooling.git "$LLM_TOOLING_DIR" ||
     echo "WARNING: Could not clone llm-tooling - Is your SSH agent forwarded?"
 bash "$LLM_TOOLING_DIR/install.sh" --yes --update ||
-    echo "WARNING: llm-tooling install failed - Tooling may be missing or stale"
+    echo "WARNING: llm-tooling MCP install failed - servers may be missing or stale"
+bash "$LLM_TOOLING_DIR/install-rules.sh" ||
+    echo "WARNING: llm-tooling rules install failed - rules may be missing or stale"
+{ claude plugin marketplace add medley56/llm-tooling &&
+    claude plugin install llm-tooling@llm-tooling &&
+    claude plugin marketplace update llm-tooling &&
+    claude plugin update llm-tooling@llm-tooling; } ||
+    echo "WARNING: llm-tooling plugin did not install or update"
 ```
 
-Nothing the installer does aborts the caller: a tooling problem is a loud
+`install.sh --update` pulls the clone, so the rules links pick up the new
+content too. `add` and `install` are no-ops once done; `update` is what moves
+the plugin forward. Nothing here aborts the caller: a tooling problem is a loud
 message, not a container that will not come up.
 
 ---
 
 ## Usage
 
-Invoke a skill as a slash command — `/commit`, `/pr-create`, `/pr-review`, `/pr-fix` — or just describe what you want and let Claude match your request to a skill or agent description:
+Invoke a skill as a slash command — `/llm-tooling:commit`, `/llm-tooling:pr-create`, `/llm-tooling:pr-review`, `/llm-tooling:pr-fix` — or just describe what you want and let Claude match your request to a skill or agent description:
 
 ```
 Run the tests.
@@ -177,17 +207,11 @@ It is not a `.mcp.json` on purpose: a project-scope `.mcp.json` has no way to
 pass an OAuth client secret, and `github-mcp` will not authenticate without one.
 Installing through the CLI is the only path that can hand one over.
 
-To install only the servers:
-
-```bash
-./install.sh --components mcp
-```
-
-They always go to **user scope**, regardless of `--scope`: a project-scope
-server lives in a `.mcp.json`, which cannot carry an OAuth client secret, and
-`--scope project` is about where skills, agents, and rules land. So running the
-project-scope variant alongside an existing user-scope install neither removes
-those servers nor duplicates them — it compares and skips them.
+Servers always go to **user scope**, regardless of `--scope`: a project-scope
+server lives in a `.mcp.json`, which cannot carry an OAuth client secret.
+`--scope project` only changes where prompted secrets are saved and which files
+are read first, so it neither removes nor duplicates an existing install — it
+compares and skips.
 
 #### Where ${VAR} values come from
 
@@ -222,7 +246,7 @@ Claude Code expands `${VAR}` only for a project-scope `.mcp.json`. A user-scope
 server keeps the literal string it was installed with, which surfaces as a 404
 against a URL containing `${GITHUB_MCP_CLIENT_ID}`. The installer therefore
 substitutes real values first, which means **the installed config holds tokens in
-cleartext**. It lives in `$CLAUDE_CONFIG_DIR/.claude.json`, outside any repo, but
+cleartext**. It lives in `~/.claude.json` (or under `$CLAUDE_CONFIG_DIR`), outside any repo, but
 do not share it.
 
 `claude mcp add-json` also type-checks numeric fields, so `callbackPort` has to
@@ -263,30 +287,27 @@ skipped rather than installed broken.
 
 ## Developing These Tools
 
-This repo develops the tooling it ships, so it installs its own components at
-**project** scope as symlinks rather than copying them into the config dir:
+The repo root is the plugin: `.claude-plugin/plugin.json` picks up `skills/` and
+`agents/`, and rules live in `rules/`. This repo develops the plugin it ships, so
+it registers its own checkout as the marketplace:
 
 ```bash
-./install.sh --yes --scope project --link --target .
+claude plugin marketplace add .
+claude plugin install llm-tooling@llm-tooling
 ```
 
-```
-.claude/skills -> ../skills
-.claude/agents -> ../agents
-.claude/rules  -> ../rules
-```
+A marketplace added from a local directory loads its plugin in place, so an edit
+is live in the next session; frontmatter changes need a new session.
+`claude --plugin-dir .` loads it for one session without installing.
+`.claude/rules` is a tracked symlink to `rules/`.
+[.devcontainer/post-create.sh](.devcontainer/post-create.sh) runs those two
+commands and `install.sh` at container creation and pre-fetches the pinned stdio
+MCP servers; `uv` comes from a devcontainer feature.
 
-Edits take effect immediately — there is one copy of each file, and `.claude/` is
-only a view onto it. Start a new session to pick up frontmatter changes.
-[.devcontainer/post-create.sh](.devcontainer/post-create.sh) runs that command at
-container creation, installs `uv` as a feature, and pre-fetches the pinned stdio
-MCP servers.
-
-The installer itself is `install.sh` plus four sourced modules in
-[scripts/lib/](scripts/lib/): `ui.sh` (output and prompting), `env.sh`
-(placeholder resolution and secret storage), `sync.sh` (component mirroring), and
-`mcp.sh` (server installation). Its only dependencies are `bash`, `jq`, `git`,
-and the `claude` CLI.
+`install.sh` sources three modules in [scripts/lib/](scripts/lib/): `ui.sh`
+(output and prompting, also used by `install-rules.sh`), `env.sh` (placeholder
+resolution and secret storage), and `mcp.sh` (server installation). Their only
+dependencies are `bash`, `jq`, `git`, and the `claude` CLI.
 
 ### New Skill
 

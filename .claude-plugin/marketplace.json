@@ -1,0 +1,14 @@
+{
+  "name": "llm-tooling",
+  "description": "Gavin Medley's skills and sub-agents for Claude Code.",
+  "owner": {
+    "name": "Gavin Medley",
+    "email": "gavin.medley@lasp.colorado.edu"
+  },
+  "plugins": [
+    {
+      "name": "llm-tooling",
+      "source": "./"
+    }
+  ]
+}

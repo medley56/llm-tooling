@@ -7,7 +7,7 @@ description: >
   agent to draft an approach, develops it into an agreed plan with the user,
   implements it, verifies it, and offers both to open a pull request and to
   archive the plan and outcome to a Notion database of implementation
-  artifacts. Invoked as /implement-change, or when the user asks to "implement
+  artifacts. Invoked as /llm-tooling:implement-change, or when the user asks to "implement
   this", "build this feature", "work this ticket", "make this change", or "plan
   and implement".
 metadata:
@@ -110,11 +110,11 @@ Get explicit approval before committing. If they want changes, go back to step 6
 
 ## 9. Commit
 
-Use the **commit** skill (`/commit`) — it decides what belongs in the commit and writes the message. Exclude the plan file.
+Use the **commit** skill (`/llm-tooling:commit`) — it decides what belongs in the commit and writes the message. Exclude the plan file.
 
 ## 10. Offer the Pull Request
 
-Ask whether to open one. On yes, use the **pr-create** skill (`/pr-create`), which pushes the branch and writes the description. **Never open a PR unprompted**, and never push before the user has said yes to one — say what is committed locally and stop.
+Ask whether to open one. On yes, use the **pr-create** skill (`/llm-tooling:pr-create`), which pushes the branch and writes the description. **Never open a PR unprompted**, and never push before the user has said yes to one — say what is committed locally and stop.
 
 ## 11. Offer to Record in Notion
 
