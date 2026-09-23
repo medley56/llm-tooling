@@ -4,15 +4,18 @@ description: >
   End-to-end path from a change request to implemented, verified code: reads
   the request from wherever it lives (a markdown file, a Jira ticket, a Notion
   page, a GitHub issue, or the prompt itself), runs the implementation-planner
-  agent to draft an approach, develops it into an agreed plan with the user,
-  implements it, verifies it, and offers both to open a pull request and to
-  archive the plan and outcome to a Notion database of implementation
-  artifacts. Invoked as /llm-tooling:implement-change, or when the user asks to "implement
-  this", "build this feature", "work this ticket", "make this change", or "plan
-  and implement".
+  agent to draft an approach, runs it past the implementation-plan-reviewer
+  agent for unnecessary complexity and missed detail, develops it into an
+  agreed plan with the user, implements it, verifies it with the
+  implementation-reviewer agent (which owns running the tests and linters),
+  and offers both to open a pull request and to archive the plan and outcome
+  to a Notion database of implementation artifacts. Invoked as
+  /llm-tooling:implement-change, or when the user asks to "implement this",
+  "build this feature", "work this ticket", "make this change", or "plan and
+  implement".
 metadata:
   author: llm-tooling
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # Implement Change
@@ -58,11 +61,21 @@ Invoke the **implementation-planner** agent with the brief and the verbatim sour
 
 Always invoke it. The one exception is a change whose whole diff you can state in a sentence — then say you are skipping the planner and why.
 
-## 4. Agree the Plan — Gate
+## 4. Adversarial Plan Review
+
+Before the user sees the plan, invoke the **implementation-plan-reviewer** agent with the brief, the verbatim source, and the current draft. It hunts for unnecessary complexity and missed detail, and returns `CLEAN` or `CHANGES REQUESTED` with findings marked blocking or non-blocking.
+
+Revise the draft for each blocking finding and invoke it again with the revision, its previous findings, and your reason for each one you declined. Loop until it returns `CLEAN`, or after three rounds, whichever comes first. A non-blocking finding you decline, or a blocking one still standing at the cap, goes to the user in step 5 with the reviewer's reasoning — never drop one silently.
+
+A finding that turns on a decision only the user can make is an open question, not a revision: carry it into step 5.
+
+Skip this step only when step 3 skipped the planner.
+
+## 5. Agree the Plan — Gate
 
 **The user approves the plan before anything is written.**
 
-Answer the planner's **Open Questions** first; nothing downstream is trustworthy while they are open. Ask them together, and never guess at one.
+Answer the planner's **Open Questions**, and any the plan review raised, first; nothing downstream is trustworthy while they are open. Ask them together, and never guess at one.
 
 Then show the plan as ordered steps:
 
@@ -74,7 +87,7 @@ Then show the plan as ordered steps:
 4   Document the new setting              README.md                 —
 ```
 
-Plus the approach in a sentence or two, the risks, and anything the planner flagged as larger than the request implied.
+Plus the approach in a sentence or two, the risks, anything the planner flagged as larger than the request implied, and any reviewer finding left standing from step 4.
 
 Take free-form direction: reorder, split, drop, or add steps, change the approach, cut scope, push back on a risk. Where you disagree with a change, say so once with the reason, then do it.
 
@@ -82,45 +95,49 @@ Keep going until the user says the plan is right. Approval of one step is not ap
 
 Write the agreed plan to `implementation-plan-<slug>.md` — steps, approach, answered questions, and a checkbox per step. It is what makes an interrupted session resumable, and it is a planning artifact, not part of the change: never commit it. Mention it once.
 
-## 5. Branch
+## 6. Branch
 
 Check the tree is clean; if it is not, say what is uncommitted and ask whether to proceed. Your commits should contain this change, not whatever was already in progress.
 
 Branch from the up-to-date base, following the repo's existing branch naming. If the repo's instructions say it commits to its default branch, stay on it and say so.
 
-## 6. Implement
+## 7. Implement
 
 Work the steps in order, keeping the plan file's checkboxes current. Follow the conventions in the repo's instruction files — the planner surfaced them.
 
 Build what the plan says. A discovery that invalidates a step — the interface is not what it looked like, the change is twice the size, a dependency is missing — goes back to the user with what you found and what you propose instead. **Do not absorb a plan change silently**, and do not widen the work because you are already in the file.
 
-## 7. Verify
+## 8. Verify
 
-Run the tests and linters the repo's instruction files or config name, not a guess. In a Python repo, use the **pytest-runner** agent. Run the full suite unless it is prohibitively slow, in which case run everything touching the changed code and say what you skipped.
+Do not run the tests or linters yourself. Invoke the **implementation-reviewer** agent with the plan file path, the brief, and the base to diff against. It runs the suite and linters, judges the diff against the plan and scope, and holds the code and tests to the repo's style. It returns `SATISFIED` or `NOT SATISFIED` with findings marked blocking or non-blocking.
 
-**Failures block.** Report them with output. Fix what your change caused; for a failure that predates it, say so, show the evidence, and let the user decide.
+Fix every blocking finding, then invoke it again with its previous findings. Loop until it returns `SATISFIED`. Stop and bring the user its latest report when:
 
-Where the change is observable in the running app rather than only in tests, exercise it and say what you saw.
+- a failure predates your change — the reviewer shows the evidence, and the user decides;
+- a finding would change the agreed plan — that goes to the user, as in step 7;
+- the same finding survives two fixes, or five rounds pass.
 
-## 8. Review the Diff
+Where the change is observable in the running app rather than only in tests, exercise it yourself and say what you saw.
 
-Show `git diff` grouped by plan step, so the user can check the code against what they approved. Call out anything you changed that no step called for, and why.
+## 9. Review the Diff
 
-Get explicit approval before committing. If they want changes, go back to step 6.
+Show `git diff` grouped by plan step, so the user can check the code against what they approved. Call out anything you changed that no step called for, and why, and any non-blocking reviewer finding you left unaddressed.
 
-## 9. Commit
+Get explicit approval before committing. If they want changes, go back to step 7; step 8 runs again before the next approval.
+
+## 10. Commit
 
 Use the **commit** skill (`/llm-tooling:commit`) — it decides what belongs in the commit and writes the message. Exclude the plan file.
 
-## 10. Offer the Pull Request
+## 11. Offer the Pull Request
 
 Ask whether to open one. On yes, use the **pr-create** skill (`/llm-tooling:pr-create`), which pushes the branch and writes the description. **Never open a PR unprompted**, and never push before the user has said yes to one — say what is committed locally and stop.
 
-## 11. Offer to Record in Notion
+## 12. Offer to Record in Notion
 
 **Ask whether to archive this change to Notion** — the plan and what actually happened, kept where they outlive the session. Ask once, here, and take a no as a no. If the user already said at invocation whether they want it, honor that instead of asking again.
 
-On yes, resolve the tools with `ToolSearch` (`+notion`). If the server is not connected or not authorized, say so in one line and go to step 12 — Notion being unavailable never blocks or undoes finished work.
+On yes, resolve the tools with `ToolSearch` (`+notion`). If the server is not connected or not authorized, say so in one line and go to step 13 — Notion being unavailable never blocks or undoes finished work.
 
 **Find the database before creating one.** Search for a Notion database named **Implementation Artifacts**. Reuse it if it exists. If it does not, ask the user which page to create it under and get a yes before creating it — a second database on a near-miss name is worse than no record. Its properties:
 
@@ -149,7 +166,7 @@ Once the record exists it supersedes `implementation-plan-<slug>.md` — offer t
 
 If the write fails, report the error verbatim and leave the local plan file in place. Do not retry into a half-written page.
 
-## 12. Report
+## 13. Report
 
 What was implemented, the commit SHAs, whether the suite passed at the final commit, the PR URL if one was opened, the Notion record URL if one was written, and anything from the plan you did not do, with the reason.
 
