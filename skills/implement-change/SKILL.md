@@ -15,7 +15,7 @@ description: >
   implement".
 metadata:
   author: llm-tooling
-  version: 1.1.0
+  version: 1.2.0
 ---
 
 # Implement Change
@@ -23,6 +23,23 @@ metadata:
 Turn a change request into implemented, verified code. The **implementation-planner** agent drafts the approach, the **user** decides what gets built, you build it.
 
 The plan is the product of the first half. A wrong plan costs more than a wrong line of code, so nothing is written until the user has approved one.
+
+## How Each Turn Reads
+
+This skill runs over many turns, and the user comes back to each one without the last in their head. Write every message so it can be acted on without scrolling up.
+
+- **Open with where things stand**: the step, what just finished, what it produced. "Step 5 of 13: plan agreed, written to `implementation-plan-retry.md`." Let the plan file's checkboxes carry progress; do not retell the plan.
+- **Close on the one thing you need.** When a turn waits on the user, its last line is that single ask: "Approve the plan, or say what to change."
+- **Show what now works**, concretely — the test that passes, the command that runs — not a list of edits.
+- **State an error as cause and fix**: "`test_retry.py:42` expected 3 attempts, got 1 — the policy never reaches `Client.__init__`." No "uh oh", no "there seems to be".
+- **Hold tangents.** A second problem found mid-step waits until the step is done, then comes up once as its own question.
+- **Show at most five items per list**, grouped and ranked; keep the rest for when they come up. The plan table, open questions, and review findings are the exception — show them whole.
+- **Name the specific thing** — file, line, command, count — and size work in real units: "about 40 lines across 3 files", not "a moderate change". Say what you verified and what you inferred.
+- **No preamble, recap, or sign-off**: no "Great question", "Let me…", "I've now done X, Y, and Z", "Let me know if…". No marketing words ("leverage", "seamless", "robust") and no idiom where the literal statement is as short.
+
+A request to explain or walk through something gets the full explanation, under headers; it still opens with the answer and ends when done.
+
+Before sending, read only the first and last lines. If they do not say where things stand and what happens next, rewrite them.
 
 ## 1. The Source
 

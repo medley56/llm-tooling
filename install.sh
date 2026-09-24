@@ -8,7 +8,7 @@
 #
 # Servers install at user scope through `claude mcp add-json`, because an OAuth
 # client secret cannot be expressed in a project .mcp.json or a plugin at all.
-# Skills and agents install as plugins, and rules with install-rules.sh.
+# Skills and agents install as a plugin.
 #
 # It does not install the Claude Code CLI. That belongs to whatever provisions
 # the machine.
@@ -145,7 +145,7 @@ fi
 
 # Past the update, so reported once rather than again by the re-exec.
 for flag in "${REMOVED[@]}"; do
-    warn "$flag is ignored - skills and agents install as plugins, rules with install-rules.sh (see README)"
+    warn "$flag is ignored - skills and agents install as a plugin (see README)"
 done
 # A --components list without mcp used to install no servers; keep it that way.
 [ "$NO_MCP" = 1 ] && { info "--components has no mcp - nothing to do"; exit 0; }

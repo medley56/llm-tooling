@@ -1,6 +1,6 @@
 # LLM Tooling
 
-Reusable agents, skills, and rules for LLM-powered coding assistants. Everything here is project-agnostic — written to drop into any repository.
+Reusable skills and agents for LLM-powered coding assistants, plus an installer for the MCP servers they use. Everything here is project-agnostic — written to drop into any repository.
 
 Built for **Claude Code**. The files are plain Markdown with YAML frontmatter, so other assistants can read them, but the discovery mechanisms below are Claude Code's.
 
@@ -36,21 +36,13 @@ Agents are sub-agents that run a multi-step task in their own context and report
 | [implementation-reviewer](agents/implementation-reviewer.md) | Verifies a finished implementation: runs the tests and linters, judges the diff against the plan and scope, and enforces the repo's style, test-suite factoring, and coverage |
 | [pytest-runner](agents/pytest-runner.md) | Runs pytest and reports results: a short summary on success, full stack traces on failure |
 
-### Rules
-
-Rules are topic-scoped instructions Claude Code loads from `.claude/rules/`. A rule with a `paths:` glob list loads only when a matching file is read; a rule without one loads at the start of every session, like `CLAUDE.md`. Use them to split conventions out of an oversized `CLAUDE.md` so each costs context only when relevant.
-
-| Rule | Loads when | Description |
-|---|---|---|
-| [general-rules](rules/general-rules.md) | Every session | How responses should read — plain, concrete, no tech-marketing register, no preamble |
-
 ---
 
 ## Installation
 
-Three pieces, because Claude Code plugins can carry skills and agents but not
-rules, and cannot hand an MCP server an OAuth client secret. None of the three
-installs the Claude Code CLI; that belongs to whatever provisions the machine.
+Two pieces, because a Claude Code plugin can carry skills and agents but cannot
+hand an MCP server an OAuth client secret. Neither installs the Claude Code CLI;
+that belongs to whatever provisions the machine.
 
 ### Skills and agents: the plugin
 
@@ -86,38 +78,17 @@ with `/plugin marketplace update llm-tooling` and then
 
 If an older version of this repo's installer put skills or agents in
 `~/.claude/skills/` or `~/.claude/agents/`, delete those entries, or every skill
-appears twice — once bare, once namespaced.
-
-### Rules: `install-rules.sh`
-
-Clone the repo, then:
-
-```bash
-git clone https://github.com/medley56/llm-tooling.git ~/src/llm-tooling
-~/src/llm-tooling/install-rules.sh                     # user scope
-~/src/llm-tooling/install-rules.sh --scope project     # ./.claude/rules
-```
-
-At **user scope** each rule is symlinked into `$CLAUDE_CONFIG_DIR/rules/`
-(default `~/.claude/rules/`), so `git pull` in the clone updates every project.
-
-At **project scope** it symlinks only when the clone sits inside the project,
-say as a submodule, and then with a relative link that survives a commit.
-Otherwise it copies. Claude Code treats a project rule linked outside the
-working directory as an external import: it does not load until external imports
-are approved, it never asks for that approval over a symlink alone, and even
-approved, a rule with `paths:` never loads.
-
-Re-run it after pulling to pick up upstream changes: a copy it made and nobody
-has edited since is updated, and one whose rule was deleted upstream is removed.
-It records what it copied in `.claude/rules/.llm-tooling-rules`. Anything else
-that differs from upstream is kept with a warning; `--force` moves it to
-`<name>.bak-<timestamp>` and replaces it. `--dry-run` reports without changing
-anything.
+appears twice — once bare, once namespaced. Likewise, this repo no longer ships
+rules: if an older `install-rules.sh` put `general-rules.md`,
+`test-suite-factoring.md`, or `.llm-tooling-rules` in `~/.claude/rules/` or a
+project's `.claude/rules/`, delete them.
 
 ### MCP servers: `install.sh`
 
+Clone the repo, then run the installer from the clone:
+
 ```bash
+git clone https://github.com/medley56/llm-tooling.git ~/src/llm-tooling
 ~/src/llm-tooling/install.sh
 ```
 
@@ -168,8 +139,6 @@ LLM_TOOLING_DIR="${LLM_TOOLING_DIR:-/workspaces/llm-tooling}"
     echo "WARNING: Could not clone llm-tooling - Is your SSH agent forwarded?"
 bash "$LLM_TOOLING_DIR/install.sh" --yes --update ||
     echo "WARNING: llm-tooling MCP install failed - servers may be missing or stale"
-bash "$LLM_TOOLING_DIR/install-rules.sh" ||
-    echo "WARNING: llm-tooling rules install failed - rules may be missing or stale"
 { claude plugin marketplace add medley56/llm-tooling &&
     claude plugin install llm-tooling@llm-tooling &&
     claude plugin marketplace update llm-tooling &&
@@ -177,10 +146,10 @@ bash "$LLM_TOOLING_DIR/install-rules.sh" ||
     echo "WARNING: llm-tooling plugin did not install or update"
 ```
 
-`install.sh --update` pulls the clone, so the rules links pick up the new
-content too. `add` and `install` are no-ops once done; `update` is what moves
-the plugin forward. Nothing here aborts the caller: a tooling problem is a loud
-message, not a container that will not come up.
+`install.sh --update` pulls the clone before installing. `add` and `install` are
+no-ops once done; `update` is what moves the plugin forward. Nothing here
+aborts the caller: a tooling problem is a loud message, not a container that
+will not come up.
 
 ---
 
@@ -192,8 +161,6 @@ Invoke a skill as a slash command — `/llm-tooling:commit`, `/llm-tooling:pr-cr
 Run the tests.
 Open a PR for this branch as a draft, and put @alice on it.
 ```
-
-Rules need no invocation. A rule with `paths:` loads when Claude reads a file matching its globs; one without loads every session.
 
 ### MCP Servers
 
@@ -288,8 +255,8 @@ skipped rather than installed broken.
 ## Developing These Tools
 
 The repo root is the plugin: `.claude-plugin/plugin.json` picks up `skills/` and
-`agents/`, and rules live in `rules/`. This repo develops the plugin it ships, so
-it registers its own checkout as the marketplace:
+`agents/`. This repo develops the plugin it ships, so it registers its own
+checkout as the marketplace:
 
 ```bash
 claude plugin marketplace add .
@@ -299,13 +266,12 @@ claude plugin install llm-tooling@llm-tooling
 A marketplace added from a local directory loads its plugin in place, so an edit
 is live in the next session; frontmatter changes need a new session.
 `claude --plugin-dir .` loads it for one session without installing.
-`.claude/rules` is a tracked symlink to `rules/`.
 [.devcontainer/post-create.sh](.devcontainer/post-create.sh) runs those two
 commands and `install.sh` at container creation and pre-fetches the pinned stdio
 MCP servers; `uv` comes from a devcontainer feature.
 
 `install.sh` sources three modules in [scripts/lib/](scripts/lib/): `ui.sh`
-(output and prompting, also used by `install-rules.sh`), `env.sh` (placeholder
+(output and prompting), `env.sh` (placeholder
 resolution and secret storage), and `mcp.sh` (server installation). Their only
 dependencies are `bash`, `jq`, `git`, and the `claude` CLI.
 
@@ -324,14 +290,6 @@ Create a Markdown file in `agents/`:
 1. Frontmatter with `name`, `description`, `tools`, and `model`. Set `model` to a specific model when the work does not need the session's default — `pytest-runner` uses `sonnet`.
 2. The `description` determines when the agent is triggered — write clear activation phrases.
 3. Write the steps in the body.
-
-### New Rule
-
-Create a Markdown file in `rules/`:
-
-1. Add a `paths:` list of globs so the rule loads only when a matching file is read. Omit `paths:` only if the rule genuinely applies to every session — it costs context in all of them.
-2. Keep it short and specific. A rule is not a manual.
-3. Do not restate what already lives in a skill or agent. Point at the canonical file so there is one source of truth.
 
 ---
 

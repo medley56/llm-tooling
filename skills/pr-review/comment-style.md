@@ -1,9 +1,7 @@
 # Comment Style
 
 How a comment destined for a GitHub PR reads — review comments and replies
-alike. General prose rules (plain register, no tech-marketing words, no
-preamble) come from `.claude/rules/general-rules.md`; this covers what is
-specific to review comments.
+alike.
 
 A review comment exists to get a change made. The author reads it once, in a
 notification, next to the code. Write for that moment.

@@ -47,7 +47,7 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # This repo develops the plugin it ships, so it registers the checkout itself as
 # the marketplace. A marketplace added from a local directory loads its plugins
 # in place, so an edit is live in the next session. Both commands are no-ops
-# once done. Rules need nothing: .claude/rules is a tracked symlink to rules/.
+# once done.
 if command -v claude >/dev/null 2>&1; then
     claude plugin marketplace add "$REPO" &&
         claude plugin install llm-tooling@llm-tooling ||

@@ -72,7 +72,6 @@ Use `##` headings only once there are several of these to separate. A few paragr
 
 - **Length tracks the change.** A one-concept branch is a headline and two or three sentences. Padding to fill out a shape is the failure to avoid.
 - **Lead with intent, and never enumerate changed files.** The diff has the mechanics.
-- Prose and register follow `.claude/rules/general-rules.md`.
 - Link tickets and issues inline, where the prose refers to them.
 
 ## Confirm, Then Open
