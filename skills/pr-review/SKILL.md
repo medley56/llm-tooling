@@ -1,30 +1,30 @@
 ---
 name: pr-review
 description: >
-  End-to-end pull request review: pulls the current state of a PR, runs the
-  github-pr-reviewer agent to draft findings, iterates with the user until the
-  comment set is right, and posts the finished review to GitHub. Invoked as
-  /llm-tooling:pr-review, or when the user asks to "review this PR", "review and post
-  comments", "submit a PR review", or "publish my review". Uses the GitHub MCP
-  server; falls back to the gh CLI only with the user's explicit approval.
+  Pull request review: runs the github-pr-reviewer agent on a PR and reports its
+  major weaknesses; on request, goes on to draft review comments, iterate on them
+  with the user, and post the review to GitHub. Invoked as /llm-tooling:pr-review,
+  or when the user asks to "review this PR", "what's wrong with this PR", "review
+  and post comments", "submit a PR review", or "publish my review". Uses the GitHub
+  MCP server; falls back to the gh CLI only with the user's explicit approval.
 metadata:
   author: llm-tooling
-  version: 3.2.1
+  version: 4.0.0
 ---
 
 # PR Review
 
-Review a pull request and post the result to GitHub. The **github-pr-reviewer** agent drafts the findings, the **user** decides which become comments, and nothing reaches GitHub until they have seen the final text of every one.
+Review a pull request and report its major weaknesses. The **github-pr-reviewer** agent drafts the findings. Steps 6–11 — drafting comments and posting them to GitHub — run only when the user asks for them; then the **user** decides which findings become comments, and nothing reaches GitHub until they have seen the final text of every one.
 
 ## 1. Input
 
-From the user's request: the PR identifier (number, URL, or branch — otherwise detect from the current branch), an existing review document, a focus area, context that should inform severity and tone, and a verdict preference. All optional.
+From the user's request: the PR identifier (number, URL, or branch — otherwise detect from the current branch), an existing review document, a focus area, context that should inform severity and tone, a verdict preference, and whether they already want comments drafted or posted ("review and post comments"). All optional.
 
 ## 2. GitHub Access
 
 Resolve the MCP tools with `ToolSearch` keyword searches — `pull request read` and `get me`, plus `pull request review comment` for the write side. Search by what the tool does, not a server prefix: the server can be registered under any name. Names vary by server version: newer ones expose a single `pull_request_review_write` with a `method` parameter (`create`, `submit_pending`, `delete_pending`) plus `add_comment_to_pending_review`; older ones expose separate `create_pending_pull_request_review` / `add_pull_request_review_comment_to_pending_review` / `submit_pending_pull_request_review`. Call `get_me` to confirm the server answers and to record the user's login for attribution.
 
-Do this **before any other work** — never put a user who cannot post through an iteration loop.
+Do this **before any other work**.
 
 If MCP cannot be resolved or reached, stop. Do not diagnose it, and do not fall back on your own:
 
@@ -32,14 +32,14 @@ If MCP cannot be resolved or reached, stop. Do not diagnose it, and do not fall 
 
 Then wait. `gh` is used **only** on explicit approval in this session, and approval does not carry to a later run. If `gh` is missing or unauthenticated, say so in one line, name `gh auth login`, and stop.
 
-If read tools resolve but no write tool does, say so now and continue — the user still gets a review document to paste.
+If read tools resolve but no write tool does, continue, and say so if the user opts into comments in step 5 — they still get a draft to paste.
 
 ## 3. Resolve the PR
 
 Record owner, repo, number, head and base branch, head SHA, and author. If no PR resolves, stop and ask for a valid identifier.
 
-- **Self-review** — if the author matches the login from step 2, GitHub rejects an approval. Say so now; step 7 is limited to `COMMENT`.
-- **Existing comments** — fetch them. Findings that duplicate them are dropped in step 5; tell the user what was dropped so they can override.
+- **Self-review** — if the author matches the login from step 2, GitHub rejects an approval, so step 8 is limited to `COMMENT`.
+- **Existing comments** — fetch them. Findings that duplicate them are dropped in steps 5 and 6; tell the user what was dropped so they can override.
 
 ## 4. Draft the Findings
 
@@ -51,7 +51,13 @@ A review document the user supplied is **input, not a substitute**: read it, pas
 
 Parse the result into a working list, preserving each finding's concept, body, severity, and locations.
 
-## 5. Shape Findings Into Comments
+## 5. Report Weaknesses
+
+Tell the user the PR's major weaknesses: the `critical` and `warning` findings, grouped by concept, most severe first — a sentence or two each on what is wrong and why it matters, with the key `path:line`. Count the lower-severity findings rather than listing them, and point to `pr-<number>-review.md` for the full detail. If nothing is `critical` or `warning`, say so plainly.
+
+Then offer to draft review comments for GitHub, and **stop**. Continue to step 6 only if the user says yes, or already asked for comments in step 1. Otherwise the skill ends here: discuss the findings if asked, but draft no comments.
+
+## 6. Shape Findings Into Comments
 
 Fetch the diff and changed-file list, and build the set of commentable positions first — **inline comments can only anchor to lines inside a diff hunk.**
 
@@ -64,7 +70,7 @@ For each finding:
 
 Also draft the **review summary body**: two to four sentences of overall assessment plus a severity tally.
 
-## 6. Iterate With the User
+## 7. Iterate With the User
 
 Show the working set as a compact table:
 
@@ -84,7 +90,7 @@ After every round, write the current state to `pr-<number>-review-submission.md`
 
 Before leaving the loop, re-validate every included anchor against the diff.
 
-## 7. Attribution and Verdict
+## 8. Attribution and Verdict
 
 Every posted comment — each inline one and the summary — ends with the attribution line defined in `comment-style.md`, comments the user wrote themselves included.
 
@@ -94,13 +100,13 @@ Then ask for the verdict unless the user already stated one. Recommend based on 
 - **REQUEST_CHANGES** — recommend when any included comment is `critical`.
 - **APPROVE** — recommend only when nothing included is `critical` or `warning`. Unavailable on your own PR.
 
-## 8. Confirm
+## 9. Confirm
 
 Show exactly what will be posted: the verdict, the full summary body, every inline comment as `path:line` plus final text, and the count — "N inline comments + 1 summary, submitted as \<VERDICT\> on PR #\<number\> in \<owner\>/\<repo\>."
 
 **Do not post without an unambiguous yes.** Silence, an ambiguous reply, or an unrelated one means do not post. If the user declines, leave the draft file and tell them re-running the skill resumes from it.
 
-## 9. Submit
+## 10. Submit
 
 Post as a **single review**, never a series of standalone comments — one review posts atomically, notifies the author once, and carries the verdict.
 
@@ -112,7 +118,7 @@ Then create the pending review, add each inline comment with its path, line, sid
 - **Pending-review creation fails** — stop and report the error verbatim. Never fall back to standalone comments; that scatters the review across the PR timeline.
 - **Submission fails after comments were added** — a populated but unsubmitted pending review now exists. Say so explicitly and offer to retry or delete it.
 
-## 10. Report
+## 11. Report
 
 Give the review URL, verdict, and comment count. Update `pr-<number>-review-submission.md` to a record of what was posted: timestamp, verdict, URL, final state of each comment, and anything not posted — dropped comments, ones converted to top-level after an anchor failure.
 
@@ -121,6 +127,6 @@ On failure, report which step broke, the exact error, the GitHub-side state (no 
 ## Rules
 
 - **The user is the reviewer of record.** This skill drafts and organizes; they decide what gets posted and are accountable for it.
-- **Do not edit source files.** Two files are written: `pr-<number>-review.md` and `pr-<number>-review-submission.md`. Nothing else.
+- **Do not edit source files.** Only `pr-<number>-review.md` is written, plus `pr-<number>-review-submission.md` once comments are drafted. Nothing else.
 - **Be honest about severity.** Never inflate a nitpick to look thorough or soften a critical finding to keep things pleasant. If the user downgrades a critical finding, do it — their review — but say once, plainly, what the risk is.
 - **Inline where it helps.** A comment on the code beats a summary paragraph, but never force an anchor outside the diff just to make one inline.
