@@ -4,12 +4,13 @@ description: >
   Writes a reviewer-focused description for the current branch and opens the
   pull request on GitHub. Invoked as /llm-tooling:pr-create, or when the user asks to "open
   a PR", "put up a PR", "create a pull request", or "write a PR description".
-  Accepts draft status, title, base branch, labels, reviewers, and assignees.
-  Uses the GitHub MCP server; falls back to the gh CLI only with the user's
-  explicit approval.
+  Opens a draft by default, for a self-review with pr-review before colleagues
+  are asked. Accepts draft status, title, base branch, labels, reviewers, and
+  assignees. Uses the GitHub MCP server; falls back to the gh CLI only with the
+  user's explicit approval.
 metadata:
   author: llm-tooling
-  version: 2.2.1
+  version: 3.0.0
 ---
 
 # Open a Pull Request
@@ -22,10 +23,11 @@ Take these from the user's request when present; otherwise use the default:
 
 | Option | Default |
 |---|---|
-| Draft | Not a draft, unless the user says draft or the branch has obvious WIP commits |
+| Draft | Draft, unless the user asks for it ready for review |
 | Title | Derived from the change; a single-commit branch may use its subject |
 | Base branch | The repo's default branch |
-| Labels, reviewers, assignees | None |
+| Assignees | The PR author — the login `get_me` returns |
+| Labels, reviewers | None |
 
 What the user supplies wins over what you infer, including their framing of *why* the change exists. Supplement it from the code; do not second-guess it.
 
@@ -60,30 +62,37 @@ If one is owed and missing, name it and offer to add it in the existing format b
 
 ## Write the Description
 
-A reviewer reads this once, before the diff, to learn what the branch does and why. Everything past that has to earn its space.
+Write for a colleague who knows the project, has a couple of minutes, and will read the diff next. Give them what the diff cannot: **why this change is being made, and why it is built this way.** Most of the words go there.
 
-Lead with a one-sentence headline of what the PR accomplishes — what it makes possible, not the title reworded — then the why: the goal it serves, not the local trigger. Add more only where a reviewer would otherwise have to reconstruct it from the diff:
+Open with one sentence on what the PR makes possible. Follow it with the goal the change serves, then the reasoning behind any choice of approach a reviewer might question. Add the following only where the reviewer would otherwise piece it together from the diff:
 
-- **What changed**, grouped by concept, when the branch spans more than one group and the headline cannot carry it.
-- **A decision** a reviewer would otherwise reverse-engineer: the choice and the goal it serves. Not the alternatives considered or the paths abandoned.
-- **How to review** — reading order, what deserves scrutiny, what can be skimmed — on a branch big enough to get lost in. Not a test plan; CI is the correctness gate.
+- **What changed**, grouped by concept, when the branch spans several.
+- **How to review**: reading order and what deserves scrutiny, on a branch big enough to get lost in.
 
-Use `##` headings only once there are several of these to separate. A few paragraphs need none.
+Write it to be scanned:
 
-- **Length tracks the change.** A one-concept branch is a headline and two or three sentences. Padding to fill out a shape is the failure to avoid.
-- **Lead with intent, and never enumerate changed files.** The diff has the mechanics.
+- Keep it short, sized to the change. A one-concept branch gets a headline and a few sentences.
+- Keep paragraphs to two or three sentences, and use a short list for parallel items.
+- Add `##` headings once there are several sections to separate.
+- Describe things plainly, in the words you would use explaining the change to a teammate at their desk.
+- State what the change does and why, and let the reviewer judge its merits.
+- Leave test results to CI and line counts to the diff.
 - Link tickets and issues inline, where the prose refers to them.
 
 ## Confirm, Then Open
 
 Show the full description, the title, the base branch, and every option — draft status, labels, reviewers, assignees — as they will be submitted. **Opening a PR notifies people and starts CI, so it happens only on an unambiguous yes.**
 
+Every time, with that summary, remind the author to review their own diff before any colleague does.
+
 On approval:
 
 1. `git push -u origin <branch>` if the branch has no upstream or has unpushed commits.
 2. Create the PR through the MCP tools with the title, body, base, and draft flag.
-3. Apply labels, reviewers, and assignees. A label that does not exist, or a reviewer without access, will be rejected — report which one and leave the PR open without it rather than failing the whole operation.
+3. Apply labels, reviewers (only if explicitly requested), and assignees. A label that does not exist, or a reviewer without access, will be rejected — report which one and leave the PR open without it rather than failing the whole operation.
 4. Report the PR URL and number.
+
+On a draft, close with the self-review step, so the last round of AI-assisted review is on GitHub for colleagues to see: run `/llm-tooling:pr-review` on this PR and have it post its comments, review the draft yourself on GitHub, answer and fix all of it with `/llm-tooling:pr-fix`, then mark the PR ready for review.
 
 If creation fails, print the full description in a code block so the work is not lost, and report the error verbatim.
 
