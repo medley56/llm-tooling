@@ -9,7 +9,7 @@ description: >
   explicit approval.
 metadata:
   author: llm-tooling
-  version: 2.2.0
+  version: 2.2.1
 ---
 
 # Open a Pull Request
@@ -31,7 +31,7 @@ What the user supplies wins over what you infer, including their framing of *why
 
 ## GitHub Access
 
-Resolve the MCP tools with `ToolSearch` keyword searches (`+github get me`, plus `+github create pull request`) before any other work. The `+github` prefix matches whether the server is registered as `github` or `github-mcp`. Names vary by server version. You will need tools to create a PR, update one, and set labels and reviewers.
+Resolve the MCP tools with `ToolSearch` keyword searches (`get me`, plus `create pull request`) before any other work. Search by what the tool does, not a server prefix: the server can be registered under any name. Names vary by server version. You will need tools to create a PR, update one, and set labels and reviewers.
 
 If MCP cannot be reached or authenticated, **stop**. Do not diagnose it, and do not fall back on your own:
 

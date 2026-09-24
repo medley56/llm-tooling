@@ -15,7 +15,7 @@ description: >
   implement".
 metadata:
   author: llm-tooling
-  version: 1.2.0
+  version: 1.2.1
 ---
 
 # Implement Change
@@ -43,13 +43,13 @@ Before sending, read only the first and last lines. If they do not say where thi
 
 ## 1. The Source
 
-The request comes from one of:
+The request comes from one of the sources below. Find a remote source's tools with a `ToolSearch` keyword search for what the tool does, never a server prefix: MCP servers can be registered under any name.
 
 - **The prompt itself** — the user describes the change inline.
 - **A file** — a path to a markdown or text spec in the repo or on disk.
-- **A Jira ticket** — an issue key or URL. Resolve tools with `ToolSearch` (`+jira get issue`). Read the description, acceptance criteria, comments, and linked issues.
-- **A Notion page** — a URL or page title. Resolve with `ToolSearch` (`+notion`).
-- **A GitHub issue or discussion** — resolve with `ToolSearch` (`+github issue read`). The `+github` prefix matches whether the server is registered as `github` or `github-mcp`.
+- **A Jira ticket** — an issue key or URL. Search `jira get issue`. Read the description, acceptance criteria, comments, and linked issues.
+- **A Notion page** — a URL or page title. Search `notion page`.
+- **A GitHub issue or discussion** — search `github issue read`.
 - Anything else the user points at — a URL, a pasted transcript, a design doc.
 
 Follow a link one level deep when the source leans on it — a ticket whose real content is in an attached doc. Say what you read.
@@ -154,7 +154,7 @@ Ask whether to open one. On yes, use the **pr-create** skill (`/llm-tooling:pr-c
 
 **Ask whether to archive this change to Notion** — the plan and what actually happened, kept where they outlive the session. Ask once, here, and take a no as a no. If the user already said at invocation whether they want it, honor that instead of asking again.
 
-On yes, resolve the tools with `ToolSearch` (`+notion`). If the server is not connected or not authorized, say so in one line and go to step 13 — Notion being unavailable never blocks or undoes finished work.
+On yes, resolve the tools with `ToolSearch` (`notion page`). If the server is not connected or not authorized, say so in one line and go to step 13 — Notion being unavailable never blocks or undoes finished work.
 
 **Find the database before creating one.** Search for a Notion database named **Implementation Artifacts**. Reuse it if it exists. If it does not, ask the user which page to create it under and get a yes before creating it — a second database on a near-miss name is worse than no record. Its properties:
 

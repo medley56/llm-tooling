@@ -10,7 +10,7 @@ description: >
   falls back to the gh CLI only with the user's explicit approval.
 metadata:
   author: llm-tooling
-  version: 1.1.1
+  version: 1.1.2
 ---
 
 # PR Fix
@@ -29,7 +29,7 @@ One option changes the shape of the workflow:
 
 ## 2. GitHub Access
 
-Resolve the MCP tools with `ToolSearch` keyword searches — `+github pull request read` and `+github get me`, plus `+github pull request review comment reply` for the reply side. The `+github` prefix matches whether the server is registered as `github` or `github-mcp`. Names vary by server version. Call `get_me` to confirm the server answers and to record the user's login for attribution.
+Resolve the MCP tools with `ToolSearch` keyword searches — `pull request read` and `get me`, plus `pull request review comment reply` for the reply side. Search by what the tool does, not a server prefix: the server can be registered under any name. Names vary by server version. Call `get_me` to confirm the server answers and to record the user's login for attribution.
 
 Do this **before any other work** — a user whose replies cannot be posted should know before anything is implemented.
 

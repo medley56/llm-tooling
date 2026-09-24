@@ -9,7 +9,7 @@ description: >
   server; falls back to the gh CLI only with the user's explicit approval.
 metadata:
   author: llm-tooling
-  version: 3.2.0
+  version: 3.2.1
 ---
 
 # PR Review
@@ -22,7 +22,7 @@ From the user's request: the PR identifier (number, URL, or branch — otherwise
 
 ## 2. GitHub Access
 
-Resolve the MCP tools with `ToolSearch` keyword searches — `+github pull request read` and `+github get me`, plus `+github pull request review comment` for the write side. The `+github` prefix matches whether the server is registered as `github` or `github-mcp`. Names vary by server version: newer ones expose a single `pull_request_review_write` with a `method` parameter (`create`, `submit_pending`, `delete_pending`) plus `add_comment_to_pending_review`; older ones expose separate `create_pending_pull_request_review` / `add_pull_request_review_comment_to_pending_review` / `submit_pending_pull_request_review`. Call `get_me` to confirm the server answers and to record the user's login for attribution.
+Resolve the MCP tools with `ToolSearch` keyword searches — `pull request read` and `get me`, plus `pull request review comment` for the write side. Search by what the tool does, not a server prefix: the server can be registered under any name. Names vary by server version: newer ones expose a single `pull_request_review_write` with a `method` parameter (`create`, `submit_pending`, `delete_pending`) plus `add_comment_to_pending_review`; older ones expose separate `create_pending_pull_request_review` / `add_pull_request_review_comment_to_pending_review` / `submit_pending_pull_request_review`. Call `get_me` to confirm the server answers and to record the user's login for attribution.
 
 Do this **before any other work** — never put a user who cannot post through an iteration loop.
 

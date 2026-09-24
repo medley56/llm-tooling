@@ -8,40 +8,10 @@ description: >
   explicitly authorizes it. Classifies each comment by type and by clarity,
   surfacing ambiguous ones as questions for the calling session to ask. Plans
   only: never implements, never edits files.
-tools:
-  - Bash
-  - Read
-  - Grep
-  - Glob
-  - Agent
-  - TodoWrite
-  - ToolSearch
-  - ListMcpResourcesTool
-  - ReadMcpResourceTool
-  - mcp__github__get_me
-  - mcp__github__get_commit
-  - mcp__github__get_file_contents
-  - mcp__github__list_branches
-  - mcp__github__list_commits
-  - mcp__github__list_pull_requests
-  - mcp__github__pull_request_read
-  - mcp__github__search_pull_requests
-  - mcp__github__search_issues
-  - mcp__github__issue_read
-  - mcp__github__list_issues
-  - mcp__github__search_code
-  - mcp__github-mcp__get_me
-  - mcp__github-mcp__get_commit
-  - mcp__github-mcp__get_file_contents
-  - mcp__github-mcp__list_branches
-  - mcp__github-mcp__list_commits
-  - mcp__github-mcp__list_pull_requests
-  - mcp__github-mcp__pull_request_read
-  - mcp__github-mcp__search_pull_requests
-  - mcp__github-mcp__search_issues
-  - mcp__github-mcp__issue_read
-  - mcp__github-mcp__list_issues
-  - mcp__github-mcp__search_code
+disallowedTools:
+  - Write
+  - Edit
+  - NotebookEdit
 model: inherit
 ---
 
@@ -70,13 +40,13 @@ Where instructions conflict, prefer the more specific file.
 
 ## Step 3: GitHub Tool Access
 
-The frontmatter `tools:` allowlist grants the GitHub MCP tools this job needs; invoke them directly. **Prefer MCP for every GitHub operation.** Resolve schemas with a `ToolSearch` keyword search — `+github <what you need>`, which matches whether the server is registered as `github` or `github-mcp` — or `ListMcpResourcesTool` to see what the server exposes.
+You have every MCP tool the session has. **Prefer MCP for every GitHub operation**, and **only read**: never call a tool that comments, reviews, merges, pushes, or otherwise writes to GitHub. The server can be registered under any name, so resolve schemas with a `ToolSearch` keyword search for what the tool does (`pull request read`, `get me`) rather than a server prefix, or list what it exposes with `ListMcpResourcesTool`.
 
 **If the caller explicitly authorized the `gh` CLI**, you may use it when MCP is unavailable. Absent that, do not reach for it — you run without a user present, so the choice is not yours.
 
 If MCP tools cannot be resolved or reached and the caller did not authorize `gh`, **stop immediately**. Never fabricate comment content. Return this and end:
 
-> **GitHub MCP server unavailable.** This agent could not reach the GitHub MCP server tools required to read PR comments: <the error, verbatim>. `ToolSearch` finding nothing for every query means the server is registered under a name this agent's `tools:` allowlist does not cover — say that, not a token problem. A server that resolves but errors is usually a stale auth token. Do not troubleshoot this from the agent side. If the user would rather run this through the `gh` CLI, re-invoke this agent with explicit authorization to use it.
+> **GitHub MCP server unavailable.** This agent could not reach the GitHub MCP server tools required to read PR comments: <the error, verbatim>. `ToolSearch` finding nothing for every query means no GitHub MCP server is connected — say that, not a token problem. A server that resolves but errors is usually a stale auth token. Do not troubleshoot this from the agent side. If the user would rather run this through the `gh` CLI, re-invoke this agent with explicit authorization to use it.
 
 ## Step 4: Resolve PR and Verify Branch
 
