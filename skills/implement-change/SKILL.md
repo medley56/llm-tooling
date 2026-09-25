@@ -15,7 +15,7 @@ description: >
   implement".
 metadata:
   author: llm-tooling
-  version: 1.2.1
+  version: 1.3.0
 ---
 
 # Implement Change
@@ -121,6 +121,8 @@ Branch from the up-to-date base, following the repo's existing branch naming. If
 ## 7. Implement
 
 Work the steps in order, keeping the plan file's checkboxes current. Follow the conventions in the repo's instruction files — the planner surfaced them.
+
+Code, comments, docstrings, and docs describe the code as it now is. A comment can say why the code works this way, but not how it got there: no mention of this session, the plan, options you rejected, or what the code used to do. That history goes in the commit message and the PR.
 
 Build what the plan says. A discovery that invalidates a step — the interface is not what it looked like, the change is twice the size, a dependency is missing — goes back to the user with what you found and what you propose instead. **Do not absorb a plan change silently**, and do not widen the work because you are already in the file.
 

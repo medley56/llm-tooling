@@ -53,11 +53,28 @@ Implementation always teaches something the plan could not know, so expect small
 
 ## Step 5: Hold It to the Repo's Style
 
-Compare the new code to its neighbors and to the prior art the plan names: naming, layering, error handling, logging, docstrings, how configuration is threaded. Flag what reads as written by someone who had not seen the rest of the repo.
+Compare the new code to its neighbors and to the prior art the plan names: naming, layering, error handling, logging, docstrings, how configuration is threaded. Flag what reads as written by someone who had not seen the rest of the repo, and any comment, docstring, or doc that tells how the code got this way (the implementation session, the plan, rejected options, earlier behavior) when it should say what the code does now. Flag that history as blocking.
 
-**Coverage.** Every new behavior, branch, and error path the brief or plan cares about has a test that would fail without the change. Flag tests that only restate the implementation, and tests duplicating coverage that already exists.
+**Unnecessary abstraction.** Flag a new private helper that should be inlined at its call sites. The signs, for a function or method under 10 lines:
 
-**Test factoring.** Follow the repo's established pattern where it has one, and say once that you did. Where it has none, the defaults for a Python suite:
+- its body wraps only 1–3 lines;
+- it is called from only one place in production code (tests do not count);
+- every caller passes several kwargs or a switch argument, so it really performs different behaviors — hasty generalization.
+
+**Coverage.** Every new behavior, branch, and error path the brief or plan cares about has a test that would fail without the change. Unit tests cover the logical branches, integration tests the external interfaces (APIs, infrastructure), and an end-to-end test is a smoke test, not branch coverage. Flag tests that only restate the implementation, and tests duplicating coverage that already exists.
+
+**Test factoring.** Flag:
+
+- a new test where a small change or addition to an existing one covers the behavior;
+- a new test module where the suite has a logical home for the test, or a test appended to the end of a module instead of beside its related tests;
+- several small tests that one parametrized test would express more clearly;
+- a mocking library or pattern other than the one the repo standardized on, or setup written by hand where the repo has a fixture or factory for it;
+- a mock that replaces the behavior the change touched, so the test no longer tests the change;
+- mocking only to keep a test "unit" — an already-fast test can run a few stack levels deep and cover in one test what heavy mocking splits into several;
+- a unit test that is slow, uses real data, or reaches an external dependency;
+- a test name that does not say what behavior it checks.
+
+Follow the repo's established structure where it has one, and say once that you did. Where it has none, the defaults for a Python suite:
 
 - pytest, with tests separated by type: `tests/unit/`, `tests/integration/`, `tests/e2e/`.
 - Fixtures in a plugins module — one or several — not defined inline in every test module.
@@ -88,7 +105,7 @@ Each deviation from the plan, whether it serves the goal, and whether it needs
 the user's agreement.
 ```
 
-**Blocking**: a failing test or linter the change caused, an unmet acceptance criterion, a dropped step, out-of-scope work, a deviation that needs the user, a coverage gap, or a style or factoring break the repo's conventions settle. `SATISFIED` means every check passed or failed only pre-existingly, and no blocking finding remains.
+**Blocking**: a failing test or linter the change caused, an unmet acceptance criterion, a dropped step, out-of-scope work, a deviation that needs the user, a coverage gap, unnecessary abstraction, or a style or factoring break the repo's conventions settle. `SATISFIED` means every check passed or failed only pre-existingly, and no blocking finding remains.
 
 ## Behavioral Rules
 
