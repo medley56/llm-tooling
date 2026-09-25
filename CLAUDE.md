@@ -27,5 +27,5 @@ Every file here is a prompt for a Claude 5-generation model, so [the rules of co
 ## Conventions These Files Share
 
 - **GitHub work goes through the MCP server.** The `gh` CLI is used only when the user explicitly approves it, per run. On MCP failure, tools stop, report, and name a stale auth token as the likely cause — they never troubleshoot `gh` or drag the user into a CLI debugging session.
-- **Code-review standards live in `agents/implementation-reviewer.md`**, severities included. The github-pr-reviewer agent runs three of them, always on Sonnet, rather than keeping criteria of its own; add a review criterion there, not in a caller.
+- **Code-review standards live in `agents/implementation-reviewer.md`**, severities included. Tests and linters run in the local-ci-runner agent. The github-pr-reviewer agent runs it first, then three reviewers primed with its results, two on Sonnet and one on its own model, rather than keeping criteria of its own; add a review criterion there, not in a caller.
 - **PR comment conventions live in `skills/pr-review/comment-style.md`**, the severity badges and the 🤖 attribution line included. The pr-review and pr-fix skills and the github-pr-reviewer agent point at it rather than restating it.

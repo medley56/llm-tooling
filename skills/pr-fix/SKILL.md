@@ -10,7 +10,7 @@ description: >
   falls back to the gh CLI only with the user's explicit approval.
 metadata:
   author: llm-tooling
-  version: 1.1.2
+  version: 1.2.0
 ---
 
 # PR Fix
@@ -93,7 +93,7 @@ If a fix turns out to be wrong, impossible, or much larger than the plan implied
 
 ## 8. Verify
 
-Run the tests and linters the repo's instruction files or config name, not a guess. In a Python repo, use the **pytest-runner** agent. Run the full suite unless it is prohibitively slow, in which case run everything touching the changed code and say what you skipped.
+Run the checks with the **local-ci-runner** agent, giving it the base branch as its base ref.
 
 **Failures block the push.** Report them with output. Fix what your changes caused; for a failure that predates them, say so, show the evidence, and let the user decide whether to proceed.
 

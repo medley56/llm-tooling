@@ -28,13 +28,13 @@ Agents are sub-agents that run a multi-step task in their own context and report
 
 | Agent | Description |
 |---|---|
-| [github-pr-reviewer](agents/github-pr-reviewer.md) | Reviews a pull request by running three implementation-reviewer agents on Sonnet and merging their findings into one review document organized by concept, with a severity on every finding |
+| [github-pr-reviewer](agents/github-pr-reviewer.md) | Reviews a pull request by running three implementation-reviewer agents (two on Sonnet, one on its own model) primed with a local-ci-runner's check results, and merging their findings into one review document organized by concept, with a severity on every finding |
 | [github-pr-fix-planner](agents/github-pr-fix-planner.md) | Fetches unresolved PR comments and plans a response to each, separating clear actions from ones needing clarification |
 | [implementation-planner](agents/implementation-planner.md) | Explores the codebase and drafts an implementation approach for a proposed change — files involved, options with trade-offs, ordered steps, tests, risks, and the questions that block implementation |
 | [repo-instructions-update-planner](agents/repo-instructions-update-planner.md) | Audits a repo's LLM context — CLAUDE.md, `.github/` Copilot instructions, agents, skills, rules, and roadmap files — for staleness and bloat, and produces an update plan |
 | [implementation-plan-reviewer](agents/implementation-plan-reviewer.md) | Adversarially reviews a draft implementation plan for unnecessary complexity and missed detail before it goes to the user |
 | [implementation-reviewer](agents/implementation-reviewer.md) | Holds the one set of code-review standards: runs the tests and linters, judges the diff against the plan or stated intent, and reviews correctness, security, performance, style, unnecessary abstraction, test factoring, and coverage. Used by implement-change and github-pr-reviewer |
-| [pytest-runner](agents/pytest-runner.md) | Runs pytest and reports results: a short summary on success, full stack traces on failure |
+| [local-ci-runner](agents/local-ci-runner.md) | Runs a repo's CI checks locally on Haiku — tests, linters, type and format checks — and reports each failure, and whether it predates the change |
 
 ---
 
@@ -159,7 +159,7 @@ Create a directory under `skills/` with a `SKILL.md`:
 
 Create a Markdown file in `agents/`:
 
-1. Frontmatter with `name`, `description`, `model`, and either `tools` (an allowlist) or `disallowedTools` (everything else, MCP included). An agent that uses an MCP server takes `disallowedTools`: a `tools:` entry must name the server, and server names differ between machines. Set `model` to a specific model when the work does not need the session's default — `pytest-runner` uses `sonnet`.
+1. Frontmatter with `name`, `description`, `model`, and either `tools` (an allowlist) or `disallowedTools` (everything else, MCP included). An agent that uses an MCP server takes `disallowedTools`: a `tools:` entry must name the server, and server names differ between machines. Set `model` to a specific model when the work does not need the session's default — `local-ci-runner` uses `haiku`.
 2. The `description` determines when the agent is triggered — write clear activation phrases.
 3. Write the steps in the body.
 
