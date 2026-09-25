@@ -15,7 +15,7 @@ description: >
   implement".
 metadata:
   author: llm-tooling
-  version: 1.3.0
+  version: 1.4.0
 ---
 
 # Implement Change
@@ -128,9 +128,9 @@ Build what the plan says. A discovery that invalidates a step — the interface 
 
 ## 8. Verify
 
-Do not run the tests or linters yourself. Invoke the **implementation-reviewer** agent with the plan file path, the brief, and the base to diff against. It runs the suite and linters, judges the diff against the plan and scope, and holds the code and tests to the repo's style. It returns `SATISFIED` or `NOT SATISFIED` with findings marked blocking or non-blocking.
+Do not run the tests or linters yourself. Invoke the **implementation-reviewer** agent with the plan file path, the brief, and the base to diff against. It runs the suite and linters, judges the diff against the plan and scope, and holds the code and tests to the repo's style. It returns `SATISFIED` or `NOT SATISFIED` with a severity on every finding; critical and warning findings block.
 
-Fix every blocking finding, then invoke it again with its previous findings. Loop until it returns `SATISFIED`. Stop and bring the user its latest report when:
+Fix every critical and warning finding, then invoke it again with its previous findings. Loop until it returns `SATISFIED`. Stop and bring the user its latest report when:
 
 - a failure predates your change — the reviewer shows the evidence, and the user decides;
 - a finding would change the agreed plan — that goes to the user, as in step 7;
@@ -140,7 +140,7 @@ Where the change is observable in the running app rather than only in tests, exe
 
 ## 9. Review the Diff
 
-Show `git diff` grouped by plan step, so the user can check the code against what they approved. Call out anything you changed that no step called for, and why, and any non-blocking reviewer finding you left unaddressed.
+Show `git diff` grouped by plan step, so the user can check the code against what they approved. Call out anything you changed that no step called for, and why, and any suggestion or nitpick from the reviewer you left unaddressed.
 
 Get explicit approval before committing. If they want changes, go back to step 7; step 8 runs again before the next approval.
 

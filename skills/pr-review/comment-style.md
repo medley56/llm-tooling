@@ -58,7 +58,7 @@ The headline is often the only line an author reads in a notification, so it
 says what is wrong, not what the category is. Keep it under about ten words,
 and let the body pick up where it stops rather than restate it.
 
-These four levels are the whole vocabulary, and the github-pr-reviewer agent
+These four levels are the whole vocabulary, and the implementation-reviewer agent
 assigns one to every finding:
 
 - critical — 🛑 `CRITICAL`

@@ -28,12 +28,12 @@ Agents are sub-agents that run a multi-step task in their own context and report
 
 | Agent | Description |
 |---|---|
-| [github-pr-reviewer](agents/github-pr-reviewer.md) | Reviews a pull request and produces a review document organized by concept, with a severity on every finding |
+| [github-pr-reviewer](agents/github-pr-reviewer.md) | Reviews a pull request by running three implementation-reviewer agents on Sonnet and merging their findings into one review document organized by concept, with a severity on every finding |
 | [github-pr-fix-planner](agents/github-pr-fix-planner.md) | Fetches unresolved PR comments and plans a response to each, separating clear actions from ones needing clarification |
 | [implementation-planner](agents/implementation-planner.md) | Explores the codebase and drafts an implementation approach for a proposed change — files involved, options with trade-offs, ordered steps, tests, risks, and the questions that block implementation |
 | [repo-instructions-update-planner](agents/repo-instructions-update-planner.md) | Audits a repo's LLM context — CLAUDE.md, `.github/` Copilot instructions, agents, skills, rules, and roadmap files — for staleness and bloat, and produces an update plan |
 | [implementation-plan-reviewer](agents/implementation-plan-reviewer.md) | Adversarially reviews a draft implementation plan for unnecessary complexity and missed detail before it goes to the user |
-| [implementation-reviewer](agents/implementation-reviewer.md) | Verifies a finished implementation: runs the tests and linters, judges the diff against the plan and scope, and enforces the repo's style, test-suite factoring, and coverage |
+| [implementation-reviewer](agents/implementation-reviewer.md) | Holds the one set of code-review standards: runs the tests and linters, judges the diff against the plan or stated intent, and reviews correctness, security, performance, style, unnecessary abstraction, test factoring, and coverage. Used by implement-change and github-pr-reviewer |
 | [pytest-runner](agents/pytest-runner.md) | Runs pytest and reports results: a short summary on success, full stack traces on failure |
 
 ---

@@ -2,7 +2,8 @@
 name: github-pr-reviewer
 description: >
   Reviews GitHub pull requests and produces a structured code review document
-  organized by concept. Use when the caller asks to "review this PR", "review
+  organized by concept, merging the findings of three implementation-reviewer
+  agents run on Sonnet. Use when the caller asks to "review this PR", "review
   pull request", "code review PR #123", or "check this PR for issues". Accepts
   a PR number, URL, or branch name. Optionally accepts a focus area and
   additional context. Produces a markdown review file named for the PR
@@ -16,30 +17,17 @@ model: inherit
 
 # GitHub PR Reviewer
 
-Review a GitHub pull request for correctness, security, performance, style, and test coverage, and produce a markdown review document organized by concept. You do not fix code and do not write implementation plans.
+Review a GitHub pull request and produce a markdown review document organized by concept. The review standards belong to the **implementation-reviewer** agent: you gather the PR, run three of them, and merge what they find. You do not fix code and do not write implementation plans.
 
 ## Step 1: Parse Caller Input
 
-- **PR identifier** (required): number (`#42`, `42`), URL, or branch name. Nothing provided is fine — Step 4 detects it from the current branch.
+- **PR identifier** (required): number (`#42`, `42`), URL, or branch name. Nothing provided is fine — Step 3 detects it from the current branch.
 - **Focus area** (optional): code, module, or concern wanting extra attention.
 - **Additional context** (optional): background such as "this is security-sensitive" or "this replaces the old caching layer".
 
-Focus area and context feed Step 6.
+Focus area and context feed Step 5.
 
-## Step 2: Read Repository Conventions
-
-So the review can judge consistency with project norms. Read any that exist:
-
-- `CLAUDE.md` and `.claude/CLAUDE.md`
-- `.github/copilot-instructions.md`
-- `.claude/rules/` (all files; a rule with a `paths:` glob applies to files it matches)
-- `.cursorrules` and `.cursor/rules/`
-- `AGENTS.md`, `CONTRIBUTING.md`, `CONVENTIONS.md`
-- `README.md` (contributor guideline sections)
-
-Where they conflict, prefer the more specific file.
-
-## Step 3: GitHub Tool Access
+## Step 2: GitHub Tool Access
 
 You have every MCP tool the session has. **Prefer MCP for every GitHub operation**, and **only read**: never call a tool that comments, reviews, merges, pushes, or otherwise writes to GitHub. The server can be registered under any name, so resolve schemas with a `ToolSearch` keyword search for what the tool does (`pull request read`, `get me`) rather than a server prefix, or list what it exposes with `ListMcpResourcesTool`.
 
@@ -49,7 +37,7 @@ If MCP tools cannot be resolved or reached and the caller did not authorize `gh`
 
 > **GitHub MCP server unavailable.** This agent could not reach the GitHub MCP server tools required to read PR data: <the error, verbatim>. `ToolSearch` finding nothing for every query means no GitHub MCP server is connected — say that, not a token problem. A server that resolves but errors is usually a stale auth token. Do not troubleshoot this from the agent side. If the user would rather run the review through the `gh` CLI, re-invoke this agent with explicit authorization to use it.
 
-## Step 4: Resolve the PR and Verify Branch State
+## Step 3: Resolve the PR and Verify Branch State
 
 **Resolve it.** A number or URL: fetch the PR's metadata (base, head, title, author, body). A branch name: search for an open PR with that head. Nothing: `git branch --show-current`, then search for its open PR. If none resolves, exit with:
 
@@ -59,40 +47,32 @@ If MCP tools cannot be resolved or reached and the caller did not authorize `gh`
 
 > The current branch `<current>` does not match the PR branch `<expected>`. Please check out the PR branch before running this agent.
 
-**Check base freshness**, which decides how Step 5 gets the diff: `git fetch origin <base>`, then compare `git rev-parse origin/<base>` against `git merge-base HEAD origin/<base>`. Equal means the local base is fresh; otherwise it is stale.
+**Check base freshness**, which decides how Step 4 gets the diff: `git fetch origin <base>`, then compare `git rev-parse origin/<base>` against `git merge-base HEAD origin/<base>`. Equal means the local base is fresh; otherwise it is stale.
 
-## Step 5: Gather PR Information
+## Step 4: Gather PR Information
 
-**The changeset.** With a fresh base, use local git: `git diff origin/<base>...HEAD` and `git diff --stat origin/<base>...HEAD`. With a stale base, fetch the diff from GitHub instead, so it is accurate relative to the remote base — if that call fails, stop with the Step 3 message. `gh pr diff` substitutes only under the caller authorization described there.
+**The changeset.** With a fresh base, the reviewers diff locally. With a stale base, fetch the diff from GitHub, so it is accurate relative to the remote base — if that call fails, stop with the Step 2 message. `gh pr diff` substitutes only under the caller authorization described there.
 
-**Metadata and existing comments.** Title, body, author, labels; existing review comments, so Step 6 does not duplicate feedback already given; CI and workflow status.
+**Metadata and existing comments.** Title, body, author, labels, and the text of any linked issue; existing review comments; CI and workflow status.
 
-**The changed files.** Read each one in full for surrounding context. For files over 500 lines, read ±50 lines around each changed hunk instead.
+## Step 5: Run Three Reviewers
 
-## Step 6: Perform Code Review
+Spawn three **implementation-reviewer** agents in parallel, **always with `model: "sonnet"`**, whatever model you run on. Give each:
 
-Evaluate every change against:
+- the PR title, body, and linked issue text as the change's intent — there is no plan;
+- the change: base `origin/<base>` when the base is fresh; otherwise the GitHub diff, written to a temporary file outside the repository;
+- the focus area, context, and existing review comments;
+- for exactly one of them, an instruction to run the tests and linters; for the other two, an instruction to skip them, with the CI status. Several suites running at once in one tree collide.
 
-1. **Correctness and logic** — off-by-one, null handling, race conditions, wrong branching, wrong return values.
-2. **Security** — injection, exposed secrets, unsafe deserialization, missing auth checks, path traversal.
-3. **Performance** — needless allocations, O(n²) where O(n) is available, missing indexes, unbounded queries, repeated expensive work.
-4. **Style and consistency** — naming, organization, and idioms measured against Step 2 and the surrounding code.
-5. **Test coverage** — new paths tested, edge cases covered, existing tests updated for changed behavior.
-6. **Documentation** — public APIs documented, complex algorithms explained, breaking changes noted.
-7. **Changelog and version** — whether an entry or bump is owed is the repo's call: infer it from what exists (`CHANGELOG.md`, `.changeset/`, `changelog.d/`; the version in `pyproject.toml`, `package.json`, `Cargo.toml`) and what comparable merges touched. Where release tooling generates them, nothing is owed.
+Note a reviewer that fails in the review file and continue with the others. If all three fail, stop and report their errors.
 
-Give a caller-supplied focus area extra scrutiny and its own section. Let caller context shift the weighting — a production hotfix weights correctness and risk over style. Skip anything that duplicates an existing review comment.
+## Step 6: Merge the Findings
+
+Merge the three reports into one list organized by **concept, not by file** — one finding may span several files, and the same problem from several reviewers is one finding. Record how many of the three reached each. Before keeping a finding only one reviewer reached, check it against the code. Where reviewers disagree on severity, read the code and decide. Drop anything that duplicates an existing review comment. A finding tagged `pre-existing` goes under CI/Workflow Status, not Findings.
 
 ## Step 7: Write the Review File
 
-Write to the repository root as `pr-<number>-review.md`.
-
-Findings are organized by **concept, not by file**; one finding may span several files. Each carries a severity:
-
-- **critical** — likely bug, security vulnerability, or data-loss risk. Must fix before merge.
-- **warning** — problematic pattern that could cause issues. Should fix before merge.
-- **suggestion** — a real improvement, not blocking.
-- **nitpick** — style or preference. Optional.
+Write to the repository root as `pr-<number>-review.md`. Every finding keeps one of the reviewers' four severities: critical, warning, suggestion, nitpick.
 
 Finding prose is what the calling session turns into posted PR comments, where these four names render as severity badges — never rename one or add a level. If the caller passes the path of a `comment-style.md`, read it and hold every finding to it.
 
@@ -115,6 +95,7 @@ Finding prose is what the calling session turns into posted PR comments, where t
 <The concern, across one or more files, with specific files and line numbers.>
 
 **Severity:** critical | warning | suggestion | nitpick
+**Found by:** <N> of 3 reviewers
 **Files:** `path/to/file1.py`, `path/to/file2.py`
 
 (Repeat per conceptual finding. Group related issues across files into one.)
