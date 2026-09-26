@@ -10,7 +10,7 @@ description: >
   user's explicit approval.
 metadata:
   author: llm-tooling
-  version: 3.2.0
+  version: 3.3.0
 ---
 
 # Open a Pull Request
@@ -29,7 +29,7 @@ Take these from the user's request when present; otherwise use the default:
 | Assignees | The PR author — the login `get_me` returns |
 | Labels, reviewers | None |
 
-What the user or a calling skill supplies wins over what you infer, including their framing of *why* the change exists. Supplement it from the code; do not second-guess it.
+What the user or a calling skill supplies wins over what you infer, including their framing of *why* the change exists. Supplement it from the code; do not contradict it. Whether it is complete is the why gate's question.
 
 ## GitHub Access
 
@@ -54,7 +54,13 @@ Read `CLAUDE.md` (and what it imports), `README.md`, and any roadmap file **befo
 
 Then read the changed files for surrounding context and cluster the changes into the conceptual groups a reviewer would form. Past ~50 files, cover the significant groups and give the mechanical ones a line.
 
-**Find the why before writing.** The diff cannot supply it. Take it from what the user or caller gave you, the linked ticket (the branch name and commit messages usually name it), and the commit messages. Where the problem, what it cost, or the goal is still unknown, ask the author before drafting: a why reconstructed from the diff only restates the what.
+## The Why — Gate
+
+**No description is drafted until you can state why this work exists.** The diff cannot supply it, and what a user or calling skill hands you varies in clarity and specificity, so judge it yourself every time, whoever invoked you.
+
+Gather the motivation from what the user or caller gave you, the linked ticket (the branch name and commit messages usually name it), and the commit messages or other planning artifacts (usually unstaged .md files). Then check that, from those sources and not from the diff, you could write each item Write the Description leads with: the problem as it stood, how much it mattered, and the goal.
+
+Any doubt on any of them — a gap, a contradiction, a vague problem statement, a why that only restates the change ("makes X safe to redrive") — means stop. Ask the author in plain text, not with `AskUserQuestion`: its fixed choices would put your guesses in their mouth. Say what you understood so far, name exactly what is missing, and end the turn. Do not draft, and do not offer candidate answers. Repeat until all of them are clear.
 
 ## Changelog and Version
 
