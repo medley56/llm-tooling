@@ -10,7 +10,7 @@ description: >
   user's explicit approval.
 metadata:
   author: llm-tooling
-  version: 3.3.0
+  version: 3.3.1
 ---
 
 # Open a Pull Request
@@ -70,41 +70,40 @@ If one is owed and missing, name it and offer to add it in the existing format b
 
 ## Write the Description
 
-Write for a colleague who knows the project and will read the diff next. A reviewer can judge whether a change achieves its goal only if they know the goal, and the diff cannot tell them. A change can pass every test and still miss the point; the description is what lets a reviewer catch that.
+Write for a colleague who knows the project and will read the diff next. The description exists to give them the goal, which the diff cannot: a change can pass every test and still miss the point. Everything else the diff already says, so a short description that states the goal plainly beats a thorough one that buries it. Most fit in 150–350 words. A large change grows in what changed, never in the why.
 
-**Lead with why:**
+**Why**: one short paragraph of prose, so the "because" and "so" survive.
 
-- **The problem as it stood**: what was broken, missing, or undefined, and what it cost. A decision nobody had made counts — name it as open, then give the answer.
-- **How bad each problem was**, by impact, not by how it was found. Where a defect survived because it is expensive to test, say so, and name the test that now guards it.
-- **The goal**: what is true once this merges, stated so a reviewer can check the diff against it.
+- **The problem as it stood**: what was broken, missing, or undefined, and what it cost. A decision nobody had made counts — name it as open.
+- **How bad it was**, by impact. Not how it was found or how it survived; if it survived because it is expensive to test, that is a clause naming the test that now guards it.
 
-**Then what changed, tied back to the why.** For each goal, how the change meets it, and the reasoning behind any approach a reviewer might question. Mechanics the diff shows plainly need no words.
+**Goal**: what is true once this merges, as a few bullets a reviewer can check the diff against.
 
-**Incidental changes** go in their own section after that: broken windows fixed along the way, such as a latent bug, a refactor that made the goal easier to reach, or cleanup at the edges of the work. Give each a line on what it fixes and, where it is not obvious, why it rode along. A serious latent bug is still called serious here.
+**What changed**: a bullet per goal, a sentence or two each, on how the change meets it and the reasoning behind any approach a reviewer might question. Name a function, parameter, or test only where the reviewer needs it to find something.
 
-Wherever they apply, also say:
+**Incidental changes**: one line each on what it fixes and, where it is not obvious, why it rode along. A serious latent bug is still called serious.
 
-- **Behavior changes that reach other services or callers**, such as an event now emitted again.
-- **Known limits, and prerequisites not yet verified** for deploying or using the change.
+Give each of these a line wherever it applies:
+
+- **A behavior change that reaches other services or callers**, such as an event now emitted again.
+- **A known limit, or a prerequisite not yet verified** for deploying or using the change.
 - **A small change that widens what can be committed, deployed, or exposed** (`.gitignore`, permissions, public endpoints): flag it with its reason, or ask the author for one. Never list it as a neutral one-liner.
 
 Check every number the description states ("two defects") against what it counts.
 
 Write it to be read:
 
-- Size it to what a reviewer needs to judge the goal, not to the diff. Cut mechanics before motivation; a small fix to a serious problem still gets its why.
-- Write the why as prose, so the "because" and "so" survive. Use lists for parallel items in the what.
-- Name headings for goals and problems, not files or components, so each section reads as the answer to a why.
+- Say each thing once. A departure from the ticket or a known limit appears in one place.
 - Describe things plainly and candidly, in the words you would use with a teammate at their desk. Say how bad a problem was.
-- Argue why the goal matters; do not argue that the change is good. The reviewer judges that against the goal.
-- Leave pass/fail to CI and line counts to the diff, but say what was not verified and which test guards the goal.
+- Argue why the goal matters; do not argue that the change is good.
+- No reading order or file tour, and leave pass/fail to CI and line counts to the diff.
 - Link tickets and issues inline, where the prose refers to them — except a Jira issue or Confluence page on `lasp.colorado.edu`, which is never linked: a public link into internal or DMZ spaces is a security finding. Name it by key or title in plain text (`PROJ-123`). Public pages on the domain are fine.
 
-Before showing it, reread only the why. If a reviewer could not judge the diff from it alone, or it restates the what, rewrite it.
+Before showing it, delete every sentence a reviewer would not miss. Then reread the why: if a reviewer could not judge the diff from it alone, or it restates the what, rewrite it.
 
 ## Confirm, Then Open
 
-Show the full description, the title, the base branch, and every option — draft status, labels, reviewers, assignees — as they will be submitted. **Opening a PR notifies people and starts CI, so it happens only on an unambiguous yes.**
+Show the full description, the title, the base branch, and every option — draft status, labels, reviewers, assignees — as they will be submitted, with no commentary beyond what the author must decide. **Opening a PR notifies people and starts CI, so it happens only on an unambiguous yes.**
 
 Every time, with that summary, remind the author to review their own diff before any colleague does.
 
