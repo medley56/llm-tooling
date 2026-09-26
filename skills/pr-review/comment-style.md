@@ -37,6 +37,10 @@ notification, next to the code. Write for that moment.
 - A code snippet either shows a prescriptive fix in place or points at the
   problem. It is never a sketch of a solution the author has not chosen.
 - Link external documentation when it is the evidence for the critique.
+- Never link to a Jira issue or Confluence page on `lasp.colorado.edu`: a
+  public link into internal or DMZ spaces is a security finding. Public pages
+  on the domain are fine. Name the issue by key (`PROJ-123`) or the page by
+  title, in plain text.
 
 Vague and specific, on the same finding:
 

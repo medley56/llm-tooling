@@ -15,7 +15,7 @@ Skills are user-facing workflows, invoked by name as a slash command or matched 
 | Skill | Description |
 |---|---|
 | [commit](skills/commit/) | `/llm-tooling:commit` — works out what in the tree belongs in the commit from session context, writes a Conventional Commits message, and commits locally; never pushes |
-| [pr-create](skills/pr-create/) | `/llm-tooling:pr-create` — writes a reviewer-focused description for the current branch and opens the pull request on GitHub, as a draft by default, then points you at a self-review — pr-review's posted comments plus your own — resolved with pr-fix before marking it ready; label, reviewer, and assignee options |
+| [pr-create](skills/pr-create/) | `/llm-tooling:pr-create` — writes a description that leads with why the change exists and ties each change to that goal, and opens the pull request on GitHub, as a draft by default, then points you at a self-review — pr-review's posted comments plus your own — resolved with pr-fix before marking it ready; label, reviewer, and assignee options |
 | [pr-review](skills/pr-review/) | `/llm-tooling:pr-review` — runs the github-pr-reviewer agent and reports the PR's major weaknesses; if you ask, iterates with you finding-by-finding and posts the review to GitHub with a severity badge on every finding and an AI-assistance attribution on every comment. Carries `comment-style.md`, the comment-writing conventions the pr-fix skill and reviewer agent also follow |
 | [pr-fix](skills/pr-fix/) | `/llm-tooling:pr-fix` — end-to-end response to review feedback: rebases onto the base branch if it has moved, plans a reply to every comment, walks you through them, implements, verifies, pushes, and replies on each thread |
 | [implement-change](skills/implement-change/) | `/llm-tooling:implement-change` — end-to-end change delivery: reads the request from a file, Jira ticket, Notion page, GitHub issue, or the prompt, runs the implementation-planner agent to draft an approach and the implementation-plan-reviewer to challenge it, agrees a plan with you before anything is written, implements it, loops the implementation-reviewer until it is satisfied, offers to open the PR, and offers to archive the plan and outcome to a Notion database of implementation artifacts |
@@ -33,7 +33,7 @@ Agents are sub-agents that run a multi-step task in their own context and report
 | [implementation-planner](agents/implementation-planner.md) | Explores the codebase and drafts an implementation approach for a proposed change — files involved, options with trade-offs, ordered steps, tests, risks, and the questions that block implementation |
 | [repo-instructions-update-planner](agents/repo-instructions-update-planner.md) | Audits a repo's LLM context — CLAUDE.md, `.github/` Copilot instructions, agents, skills, rules, and roadmap files — for staleness and bloat, and produces an update plan |
 | [implementation-plan-reviewer](agents/implementation-plan-reviewer.md) | Adversarially reviews a draft implementation plan for unnecessary complexity and missed detail before it goes to the user |
-| [implementation-reviewer](agents/implementation-reviewer.md) | Holds the one set of code-review standards: runs the tests and linters, judges the diff against the plan or stated intent, and reviews correctness, security, performance, style, unnecessary abstraction, test factoring, and coverage. Used by implement-change and github-pr-reviewer |
+| [implementation-reviewer](agents/implementation-reviewer.md) | Holds the one set of code-review standards: gets check results from local-ci-runner, judges the diff against the plan or stated intent, and reviews correctness, security, performance, style, unnecessary abstraction, test factoring, and coverage. Used by implement-change and github-pr-reviewer |
 | [local-ci-runner](agents/local-ci-runner.md) | Runs a repo's CI checks locally on Haiku — tests, linters, type and format checks — and reports each failure, and whether it predates the change |
 
 ---
@@ -66,6 +66,7 @@ Components are namespaced by the plugin: skills run as `/llm-tooling:commit`,
 `/llm-tooling:pr-review`, and so on, and agents load as
 `llm-tooling:github-pr-reviewer`.
 
+The plugin is versioned: an update arrives only when a new version is released.
 Auto-update is off by default for a third-party marketplace. Turn it on in
 `/plugin` → Marketplaces → llm-tooling → Enable auto-update, or update by hand
 with `/plugin marketplace update llm-tooling` and then
@@ -142,7 +143,9 @@ claude plugin install llm-tooling@llm-tooling
 ```
 
 A marketplace added from a local directory loads its plugin in place, so an edit
-is live in the next session; frontmatter changes need a new session.
+is live in the next session; frontmatter changes need a new session. Bump
+`version` in `.claude-plugin/plugin.json` with every change you ship — users
+receive nothing until it changes.
 `claude --plugin-dir .` loads it for one session without installing.
 [.devcontainer/post-create.sh](.devcontainer/post-create.sh) installs the Claude
 Code CLI and runs those two commands at container creation.

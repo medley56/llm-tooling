@@ -9,7 +9,7 @@ description: >
   MCP server; falls back to the gh CLI only with the user's explicit approval.
 metadata:
   author: llm-tooling
-  version: 4.0.0
+  version: 4.1.0
 ---
 
 # PR Review

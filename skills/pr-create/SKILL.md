@@ -10,7 +10,7 @@ description: >
   user's explicit approval.
 metadata:
   author: llm-tooling
-  version: 3.1.0
+  version: 3.2.0
 ---
 
 # Open a Pull Request
@@ -92,7 +92,7 @@ Write it to be read:
 - Describe things plainly and candidly, in the words you would use with a teammate at their desk. Say how bad a problem was.
 - Argue why the goal matters; do not argue that the change is good. The reviewer judges that against the goal.
 - Leave pass/fail to CI and line counts to the diff, but say what was not verified and which test guards the goal.
-- Link tickets and issues inline, where the prose refers to them.
+- Link tickets and issues inline, where the prose refers to them — except a Jira issue or Confluence page on `lasp.colorado.edu`, which is never linked: a public link into internal or DMZ spaces is a security finding. Name it by key or title in plain text (`PROJ-123`). Public pages on the domain are fine.
 
 Before showing it, reread only the why. If a reviewer could not judge the diff from it alone, or it restates the what, rewrite it.
 
