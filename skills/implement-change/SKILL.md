@@ -15,7 +15,7 @@ description: >
   implement".
 metadata:
   author: llm-tooling
-  version: 1.4.0
+  version: 1.5.0
 ---
 
 # Implement Change
@@ -150,7 +150,17 @@ Use the **commit** skill (`/llm-tooling:commit`) — it decides what belongs in 
 
 ## 11. Offer the Pull Request
 
-Ask whether to open one. On yes, use the **pr-create** skill (`/llm-tooling:pr-create`), which pushes the branch and writes the description. **Never open a PR unprompted**, and never push before the user has said yes to one — say what is committed locally and stop.
+Ask whether to open one. On yes, use the **pr-create** skill (`/llm-tooling:pr-create`), which pushes the branch and writes the description.
+
+The description's job is to let reviewers judge whether the change meets its goal, and only this session holds the goal. Hand pr-create the why as the author's framing, **verbatim, not summarized**:
+
+- the source's own statement of the problem, in its words;
+- the brief's goal and acceptance criteria as the user agreed them;
+- the questions settled in step 5, with their answers;
+- defects found along the way, and how bad each is;
+- the incidental changes called out in step 9, and why each rode along.
+
+**Never open a PR unprompted**, and never push before the user has said yes to one — say what is committed locally and stop.
 
 ## 12. Offer to Record in Notion
 

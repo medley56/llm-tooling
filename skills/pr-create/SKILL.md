@@ -10,7 +10,7 @@ description: >
   user's explicit approval.
 metadata:
   author: llm-tooling
-  version: 3.0.0
+  version: 3.1.0
 ---
 
 # Open a Pull Request
@@ -29,7 +29,7 @@ Take these from the user's request when present; otherwise use the default:
 | Assignees | The PR author — the login `get_me` returns |
 | Labels, reviewers | None |
 
-What the user supplies wins over what you infer, including their framing of *why* the change exists. Supplement it from the code; do not second-guess it.
+What the user or a calling skill supplies wins over what you infer, including their framing of *why* the change exists. Supplement it from the code; do not second-guess it.
 
 ## GitHub Access
 
@@ -54,6 +54,8 @@ Read `CLAUDE.md` (and what it imports), `README.md`, and any roadmap file **befo
 
 Then read the changed files for surrounding context and cluster the changes into the conceptual groups a reviewer would form. Past ~50 files, cover the significant groups and give the mechanical ones a line.
 
+**Find the why before writing.** The diff cannot supply it. Take it from what the user or caller gave you, the linked ticket (the branch name and commit messages usually name it), and the commit messages. Where the problem, what it cost, or the goal is still unknown, ask the author before drafting: a why reconstructed from the diff only restates the what.
+
 ## Changelog and Version
 
 Infer from what exists (`CHANGELOG.md`, `.changeset/`, `changelog.d/`; the version in `pyproject.toml`, `package.json`, `Cargo.toml`) and what comparable merges touched whether this branch owes an entry or a bump. Where release tooling — release-please, changesets, towncrier — generates them, nothing is owed.
@@ -62,22 +64,37 @@ If one is owed and missing, name it and offer to add it in the existing format b
 
 ## Write the Description
 
-Write for a colleague who knows the project, has a couple of minutes, and will read the diff next. Give them what the diff cannot: **why this change is being made, and why it is built this way.** Most of the words go there.
+Write for a colleague who knows the project and will read the diff next. A reviewer can judge whether a change achieves its goal only if they know the goal, and the diff cannot tell them. A change can pass every test and still miss the point; the description is what lets a reviewer catch that.
 
-Open with one sentence on what the PR makes possible. Follow it with the goal the change serves, then the reasoning behind any choice of approach a reviewer might question. Add the following only where the reviewer would otherwise piece it together from the diff:
+**Lead with why:**
 
-- **What changed**, grouped by concept, when the branch spans several.
-- **How to review**: reading order and what deserves scrutiny, on a branch big enough to get lost in.
+- **The problem as it stood**: what was broken, missing, or undefined, and what it cost. A decision nobody had made counts — name it as open, then give the answer.
+- **How bad each problem was**, by impact, not by how it was found. Where a defect survived because it is expensive to test, say so, and name the test that now guards it.
+- **The goal**: what is true once this merges, stated so a reviewer can check the diff against it.
 
-Write it to be scanned:
+**Then what changed, tied back to the why.** For each goal, how the change meets it, and the reasoning behind any approach a reviewer might question. Mechanics the diff shows plainly need no words.
 
-- Keep it short, sized to the change. A one-concept branch gets a headline and a few sentences.
-- Keep paragraphs to two or three sentences, and use a short list for parallel items.
-- Add `##` headings once there are several sections to separate.
-- Describe things plainly, in the words you would use explaining the change to a teammate at their desk.
-- State what the change does and why, and let the reviewer judge its merits.
-- Leave test results to CI and line counts to the diff.
+**Incidental changes** go in their own section after that: broken windows fixed along the way, such as a latent bug, a refactor that made the goal easier to reach, or cleanup at the edges of the work. Give each a line on what it fixes and, where it is not obvious, why it rode along. A serious latent bug is still called serious here.
+
+Wherever they apply, also say:
+
+- **Behavior changes that reach other services or callers**, such as an event now emitted again.
+- **Known limits, and prerequisites not yet verified** for deploying or using the change.
+- **A small change that widens what can be committed, deployed, or exposed** (`.gitignore`, permissions, public endpoints): flag it with its reason, or ask the author for one. Never list it as a neutral one-liner.
+
+Check every number the description states ("two defects") against what it counts.
+
+Write it to be read:
+
+- Size it to what a reviewer needs to judge the goal, not to the diff. Cut mechanics before motivation; a small fix to a serious problem still gets its why.
+- Write the why as prose, so the "because" and "so" survive. Use lists for parallel items in the what.
+- Name headings for goals and problems, not files or components, so each section reads as the answer to a why.
+- Describe things plainly and candidly, in the words you would use with a teammate at their desk. Say how bad a problem was.
+- Argue why the goal matters; do not argue that the change is good. The reviewer judges that against the goal.
+- Leave pass/fail to CI and line counts to the diff, but say what was not verified and which test guards the goal.
 - Link tickets and issues inline, where the prose refers to them.
+
+Before showing it, reread only the why. If a reviewer could not judge the diff from it alone, or it restates the what, rewrite it.
 
 ## Confirm, Then Open
 
