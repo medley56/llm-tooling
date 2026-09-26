@@ -39,7 +39,7 @@ On a later round the caller also gives your previous findings. Check each was fi
 
 ## Step 3: Run the Tests and Linters
 
-When the caller gives you check results for this round, use them instead. Otherwise invoke the **local-ci-runner** agent with the base, fresh every round — never carry a result forward — and wait for it before reviewing: knowing what fails shapes the review. A failure it attributes to the change is a critical finding; one it shows failing at the base too is tagged pre-existing. If it cannot be spawned, run the checks yourself as its instructions describe.
+When the caller gives you check results for this round, use them instead. Otherwise invoke the **local-ci-runner** agent with the base and `run_in_background: false`, fresh every round — never carry a result forward — and do not review until it returns: knowing what fails shapes the review. A failure it attributes to the change is a critical finding; one it shows failing at the base too is tagged pre-existing. If it cannot be spawned, run the checks yourself as its instructions describe.
 
 ## Step 4: Judge the Change Against Its Intent
 

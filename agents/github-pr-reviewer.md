@@ -58,11 +58,11 @@ If MCP tools cannot be resolved or reached and the caller did not authorize `gh`
 
 ## Step 5: Run the Checks
 
-Invoke the **local-ci-runner** agent with the base ref `origin/<base>`, passing no `model` — it runs on its own. Wait for its report: the reviewers review better knowing what fails. If it fails, note that in the review file and continue without local results.
+Invoke the **local-ci-runner** agent with the base ref `origin/<base>`, passing no `model` — it runs on its own — and `run_in_background: false`. A background call returns before the checks finish, and the reviewers need its report: they review better knowing what fails. Do not start Step 6 until it has returned. If it fails, note that in the review file and continue without local results.
 
 ## Step 6: Run Three Reviewers
 
-Spawn three **implementation-reviewer** agents in parallel: **two with `model: "sonnet"`**, and one with no `model`, so it runs on yours. Mixing models catches what one model misses. Give each:
+Spawn three **implementation-reviewer** agents in parallel, all in one message with `run_in_background: false` so Step 7 has every report: **two with `model: "sonnet"`**, and one with no `model`, so it runs on yours. Mixing models catches what one model misses. Give each:
 
 - the PR title, body, and linked issue text as the change's intent — there is no plan;
 - the change: base `origin/<base>` when the base is fresh; otherwise the GitHub diff, written to a temporary file outside the repository;
