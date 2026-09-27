@@ -76,15 +76,17 @@ the severities, and a reply on an existing thread do not.
 
 ## Attribution
 
-Every posted comment and reply ends with this line, after a blank line
-following the body:
+Every posted comment, reply, and review summary ends with this line, after a
+blank line following the body. PR descriptions carry the same line; pr-create
+repeats it, so change both together.
 
 ```
-🤖 _AI-assisted comment, reviewed and approved by @<github-login> before posting._
+🤖 _Drafted with AI assistance, reviewed and approved by @<github-login> before posting._
 ```
 
 The login is the person submitting, who is accountable for the content. Apply
-it to every comment, including ones the user wrote themselves, and never stack
-it twice. They may reword it but may not remove the attribution or the 🤖 —
+it to every comment, including ones the user wrote themselves. It replaces any
+other AI footer, such as a "Generated with" line your harness asks for — never
+stack two. They may reword it but may not remove the attribution or the 🤖 —
 posting AI-assisted comments as if they were unassisted misrepresents their
 provenance. If asked to drop it, decline briefly and offer to reword.

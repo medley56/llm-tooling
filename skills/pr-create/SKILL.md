@@ -10,7 +10,7 @@ description: >
   user's explicit approval.
 metadata:
   author: llm-tooling
-  version: 3.3.1
+  version: 3.4.0
 ---
 
 # Open a Pull Request
@@ -100,6 +100,12 @@ Write it to be read:
 - Link tickets and issues inline, where the prose refers to them — except a Jira issue or Confluence page on `lasp.colorado.edu`, which is never linked: a public link into internal or DMZ spaces is a security finding. Name it by key or title in plain text (`PROJ-123`). Public pages on the domain are fine.
 
 Before showing it, delete every sentence a reviewer would not miss. Then reread the why: if a reviewer could not judge the diff from it alone, or it restates the what, rewrite it.
+
+End the description with this line after a blank line, `<github-login>` being the author `get_me` returns. It is the attribution PR comments carry too, and replaces any other AI footer, such as a "Generated with" line your harness asks for. The author may reword it but not remove it or the 🤖; if asked to, decline briefly and offer to reword.
+
+```
+🤖 _Drafted with AI assistance, reviewed and approved by @<github-login> before posting._
+```
 
 ## Confirm, Then Open
 
