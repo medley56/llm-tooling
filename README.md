@@ -19,6 +19,7 @@ Skills are user-facing workflows, invoked by name as a slash command or matched 
 | [pr-review](skills/pr-review/) | `/llm-tooling:pr-review` — runs the github-pr-reviewer agent and reports the PR's major weaknesses; if you ask, iterates with you finding-by-finding and posts the review to GitHub with a severity badge on every finding and an AI-assistance attribution on every comment. Carries `comment-style.md`, the comment-writing conventions the pr-fix skill and reviewer agent also follow |
 | [pr-fix](skills/pr-fix/) | `/llm-tooling:pr-fix` — end-to-end response to review feedback: rebases onto the base branch if it has moved, plans a reply to every comment, walks you through them, implements, verifies, pushes, and replies on each thread |
 | [implement-change](skills/implement-change/) | `/llm-tooling:implement-change` — end-to-end change delivery: reads the request from a file, Jira ticket, Notion page, GitHub issue, or the prompt, runs the implementation-planner agent to draft an approach and the implementation-plan-reviewer to challenge it, agrees a plan with you before anything is written, implements it, loops the implementation-reviewer until it is satisfied, offers to open the PR, and offers to archive the plan and outcome to a Notion database of implementation artifacts |
+| [ticket-refine](skills/ticket-refine/) | `/llm-tooling:ticket-refine` — audits a draft ticket from Jira, GitHub, Notion, or a markdown file before it is assigned: confirms the goal with you, sends read-only investigators across every repo and source the work is likely to touch, trims the extra scope they claim to what the goal cannot be met without, and recommends changes to the ticket and at most five separate tickets; writes the redraft back only when you ask |
 | [create-presentation](skills/create-presentation/) | Creates a reveal.js HTML presentation from markdown, a topic description, or rough notes using the Assertion-Evidence slide design methodology |
 | [create-gauntlet-loop-prompt](skills/create-gauntlet-loop-prompt/) | Interactively builds a "Gauntlet Loop" prompt — extracts the real requirements, sets an inspectable quality bar, and emits a builder/critic loop prompt |
 
@@ -34,6 +35,8 @@ Agents are sub-agents that run a multi-step task in their own context and report
 | [repo-instructions-update-planner](agents/repo-instructions-update-planner.md) | Audits a repo's LLM context — CLAUDE.md, `.github/` Copilot instructions, agents, skills, rules, and roadmap files — for staleness and bloat, and produces an update plan |
 | [implementation-plan-reviewer](agents/implementation-plan-reviewer.md) | Adversarially reviews a draft implementation plan for unnecessary complexity and missed detail before it goes to the user |
 | [implementation-reviewer](agents/implementation-reviewer.md) | Holds the one set of code-review standards: gets check results from local-ci-runner, judges the diff against the plan or stated intent, and reviews correctness, security, performance, style, unnecessary abstraction, test factoring, and coverage. Used by implement-change and github-pr-reviewer |
+| [ticket-scope-investigator](agents/ticket-scope-investigator.md) | Checks a draft ticket against one repo, doc set, ticket trail, or web source for wrong claims, holes, and undocumented scope. Used by ticket-refine |
+| [ticket-scope-trimmer](agents/ticket-scope-trimmer.md) | Judges each item of claimed extra scope as required, deferrable, or droppable, after trying the cheapest way around it. Used by ticket-refine |
 | [local-ci-runner](agents/local-ci-runner.md) | Runs a repo's CI checks locally on Haiku — tests, linters, type and format checks — and reports each failure, and whether it predates the change |
 
 ---
@@ -117,8 +120,8 @@ with `claude mcp add` or in your own devcontainer hook:
 
 | Server | Used by |
 |---|---|
-| GitHub | pr-create, pr-review, pr-fix, and their agents; implement-change for GitHub issues |
-| Jira, Notion | implement-change, when the request lives there or you archive to Notion |
+| GitHub | pr-create, pr-review, pr-fix, and their agents; implement-change and ticket-refine for GitHub issues |
+| Jira, Notion | implement-change and ticket-refine, when the ticket lives there; implement-change to archive to Notion |
 
 Register a server under any name. Skills and agents find its tools by what they
 do, not by server name, and the GitHub agents are granted every MCP tool the

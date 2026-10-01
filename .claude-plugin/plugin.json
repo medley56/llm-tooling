@@ -1,7 +1,7 @@
 {
   "name": "llm-tooling",
-  "version": "2.4.0",
-  "description": "Skills and sub-agents for committing, opening, reviewing, and fixing pull requests, planning and implementing changes, running CI checks locally, auditing a repo's LLM instructions, and building presentations and Gauntlet Loop prompts.",
+  "version": "2.5.0",
+  "description": "Skills and sub-agents for committing, opening, reviewing, and fixing pull requests, refining tickets before they are assigned, planning and implementing changes, running CI checks locally, auditing a repo's LLM instructions, and building presentations and Gauntlet Loop prompts.",
   "author": {
     "name": "Gavin Medley",
     "email": "gavin.medley@lasp.colorado.edu"
