@@ -27,11 +27,24 @@
 						120
 					]
 				},
-				"editor.formatOnSave": true
-			},
-			"workbench.trustedDomains": [
-				"https://claude.ai"
-			]
+				"editor.formatOnSave": true,
+				"workbench.colorCustomizations": {
+					"titleBar.activeBackground": "#6B4C9A",
+					"titleBar.activeForeground": "#FFFFFF",
+					"titleBar.inactiveBackground": "#56407A",
+					"titleBar.inactiveForeground": "#FFFFFFCC",
+					"activityBar.background": "#7A5BAA",
+					"activityBar.foreground": "#FFFFFF",
+					"activityBar.inactiveForeground": "#FFFFFF99",
+					"statusBar.background": "#6B4C9A",
+					"statusBar.foreground": "#FFFFFF",
+					"statusBarItem.remoteBackground": "#56407A",
+					"statusBarItem.remoteForeground": "#FFFFFF"
+				},
+				"workbench.trustedDomains": [
+					"https://claude.ai"
+				]
+			}
 		}
 	},
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
