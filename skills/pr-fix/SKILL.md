@@ -5,11 +5,11 @@ description: >
   unresolved comments, runs the github-pr-fix-planner agent to plan a response
   to each one, walks the user through them, implements the approved fixes,
   verifies and reviews the result, pushes, and replies on each comment thread.
-  Invoked as /llm-tooling:pr-fix, or when the user asks to "address review comments", "fix
+  Invoked as /medley-tools:pr-fix, or when the user asks to "address review comments", "fix
   the PR feedback", or "respond to my reviewer". Uses the GitHub MCP server;
   falls back to the gh CLI only with the user's explicit approval.
 metadata:
-  author: llm-tooling
+  author: medley-tools
   version: 1.2.0
 ---
 

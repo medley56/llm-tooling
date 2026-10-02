@@ -8,7 +8,7 @@ description: >
   optional theme preference and output path. Do NOT use for PowerPoint,
   Google Slides, Keynote, or W3C Slidy formats.
 metadata:
-  author: llm-tooling
+  author: medley-tools
   version: 1.0.1
 ---
 

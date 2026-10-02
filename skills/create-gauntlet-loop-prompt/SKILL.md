@@ -11,7 +11,7 @@ description: >
   Do NOT use to actually implement the feature — this skill produces the prompt,
   not the code.
 metadata:
-  author: llm-tooling
+  author: medley-tools
   version: 1.0.1
 ---
 

@@ -3,12 +3,12 @@ name: pr-review
 description: >
   Pull request review: runs the github-pr-reviewer agent on a PR and reports its
   major weaknesses; on request, goes on to draft review comments, iterate on them
-  with the user, and post the review to GitHub. Invoked as /llm-tooling:pr-review,
+  with the user, and post the review to GitHub. Invoked as /medley-tools:pr-review,
   or when the user asks to "review this PR", "what's wrong with this PR", "review
   and post comments", "submit a PR review", or "publish my review". Uses the GitHub
   MCP server; falls back to the gh CLI only with the user's explicit approval.
 metadata:
-  author: llm-tooling
+  author: medley-tools
   version: 4.2.0
 ---
 

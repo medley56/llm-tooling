@@ -7,12 +7,12 @@ description: >
   be involved, trims the extra scope they claim down to what the goal cannot be
   met without, and recommends what to change in the ticket and what, if
   anything, belongs in a separate one. Reads the ticket from Jira, GitHub, Notion,
-  a markdown file, or the prompt. Invoked as /llm-tooling:ticket-refine, or when
+  a markdown file, or the prompt. Invoked as /medley-tools:ticket-refine, or when
   the user asks to "refine this ticket", "review this ticket", "is this ticket
   ready", "audit the scope of this ticket", "groom this ticket", or "what is
   this ticket missing".
 metadata:
-  author: llm-tooling
+  author: medley-tools
   version: 1.0.0
 ---
 

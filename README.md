@@ -14,12 +14,12 @@ Skills are user-facing workflows, invoked by name as a slash command or matched 
 
 | Skill | Description |
 |---|---|
-| [commit](skills/commit/) | `/llm-tooling:commit` — works out what in the tree belongs in the commit from session context, writes a Conventional Commits message, and commits locally; never pushes |
-| [pr-create](skills/pr-create/) | `/llm-tooling:pr-create` — writes a description that leads with why the change exists and ties each change to that goal, and opens the pull request on GitHub, as a draft by default, with the same AI-assistance attribution pr-review puts on comments, then points you at a self-review — pr-review's posted comments plus your own — resolved with pr-fix before marking it ready; label, reviewer, and assignee options |
-| [pr-review](skills/pr-review/) | `/llm-tooling:pr-review` — runs the github-pr-reviewer agent and reports the PR's major weaknesses; if you ask, iterates with you finding-by-finding and posts the review to GitHub with a severity badge on every finding and an AI-assistance attribution on every comment. Carries `comment-style.md`, the comment-writing conventions the pr-fix skill and reviewer agent also follow |
-| [pr-fix](skills/pr-fix/) | `/llm-tooling:pr-fix` — end-to-end response to review feedback: rebases onto the base branch if it has moved, plans a reply to every comment, walks you through them, implements, verifies, pushes, and replies on each thread |
-| [implement-change](skills/implement-change/) | `/llm-tooling:implement-change` — end-to-end change delivery: reads the request from a file, Jira ticket, Notion page, GitHub issue, or the prompt, runs the implementation-planner agent to draft an approach and the implementation-plan-reviewer to challenge it, agrees a plan with you before anything is written, implements it, loops the implementation-reviewer until it is satisfied, offers to open the PR, and offers to archive the plan and outcome to a Notion database of implementation artifacts |
-| [ticket-refine](skills/ticket-refine/) | `/llm-tooling:ticket-refine` — audits a draft ticket from Jira, GitHub, Notion, or a markdown file before it is assigned: confirms the goal with you, sends read-only investigators across every repo and source the work is likely to touch, trims the extra scope they claim to what the goal cannot be met without, and recommends changes to the ticket and at most five separate tickets; writes the redraft back only when you ask |
+| [commit](skills/commit/) | `/medley-tools:commit` — works out what in the tree belongs in the commit from session context, writes a Conventional Commits message, and commits locally; never pushes |
+| [pr-create](skills/pr-create/) | `/medley-tools:pr-create` — writes a description that leads with why the change exists and ties each change to that goal, and opens the pull request on GitHub, as a draft by default, with the same AI-assistance attribution pr-review puts on comments, then points you at a self-review — pr-review's posted comments plus your own — resolved with pr-fix before marking it ready; label, reviewer, and assignee options |
+| [pr-review](skills/pr-review/) | `/medley-tools:pr-review` — runs the github-pr-reviewer agent and reports the PR's major weaknesses; if you ask, iterates with you finding-by-finding and posts the review to GitHub with a severity badge on every finding and an AI-assistance attribution on every comment. Carries `comment-style.md`, the comment-writing conventions the pr-fix skill and reviewer agent also follow |
+| [pr-fix](skills/pr-fix/) | `/medley-tools:pr-fix` — end-to-end response to review feedback: rebases onto the base branch if it has moved, plans a reply to every comment, walks you through them, implements, verifies, pushes, and replies on each thread |
+| [implement-change](skills/implement-change/) | `/medley-tools:implement-change` — end-to-end change delivery: reads the request from a file, Jira ticket, Notion page, GitHub issue, or the prompt, runs the implementation-planner agent to draft an approach and the implementation-plan-reviewer to challenge it, agrees a plan with you before anything is written, implements it, loops the implementation-reviewer until it is satisfied, offers to open the PR, and offers to archive the plan and outcome to a Notion database of implementation artifacts |
+| [ticket-refine](skills/ticket-refine/) | `/medley-tools:ticket-refine` — audits a draft ticket from Jira, GitHub, Notion, or a markdown file before it is assigned: confirms the goal with you, sends read-only investigators across every repo and source the work is likely to touch, trims the extra scope they claim to what the goal cannot be met without, and recommends changes to the ticket and at most five separate tickets; writes the redraft back only when you ask |
 | [create-presentation](skills/create-presentation/) | Creates a reveal.js HTML presentation from markdown, a topic description, or rough notes using the Assertion-Evidence slide design methodology |
 | [create-gauntlet-loop-prompt](skills/create-gauntlet-loop-prompt/) | Interactively builds a "Gauntlet Loop" prompt — extracts the real requirements, sets an inspectable quality bar, and emits a builder/critic loop prompt |
 
@@ -43,12 +43,14 @@ Agents are sub-agents that run a multi-step task in their own context and report
 
 ## Installation
 
-This repo is its own plugin marketplace, with one plugin, `llm-tooling`. It
-needs the Claude Code CLI already installed:
+This repo is a plugin marketplace named `medley56`, with one plugin,
+`medley-tools`. Add the marketplace by its GitHub repo, `medley56/llm-tooling`;
+every command after that refers to it by name, `medley56`. It needs the Claude
+Code CLI already installed:
 
 ```
 /plugin marketplace add medley56/llm-tooling
-/plugin install llm-tooling@llm-tooling
+/plugin install medley-tools@medley56
 ```
 
 To install for everyone who works in a project, use `claude plugin install
@@ -60,20 +62,20 @@ project's committed `.claude/settings.json`:
 ```json
 {
   "extraKnownMarketplaces": {
-    "llm-tooling": { "source": { "source": "github", "repo": "medley56/llm-tooling" } }
+    "medley56": { "source": { "source": "github", "repo": "medley56/llm-tooling" } }
   }
 }
 ```
 
-Components are namespaced by the plugin: skills run as `/llm-tooling:commit`,
-`/llm-tooling:pr-review`, and so on, and agents load as
-`llm-tooling:github-pr-reviewer`.
+Components are namespaced by the plugin: skills run as `/medley-tools:commit`,
+`/medley-tools:pr-review`, and so on, and agents load as
+`medley-tools:github-pr-reviewer`.
 
 The plugin is versioned: an update arrives only when a new version is released.
 Auto-update is off by default for a third-party marketplace. Turn it on in
-`/plugin` → Marketplaces → llm-tooling → Enable auto-update, or update by hand
-with `/plugin marketplace update llm-tooling` and then
-`/plugin update llm-tooling@llm-tooling`.
+`/plugin` → Marketplaces → medley56 → Enable auto-update, or update by hand
+with `/plugin marketplace update medley56` and then
+`/plugin update medley-tools@medley56`.
 
 ### In a devcontainer
 
@@ -82,14 +84,29 @@ after that updates:
 
 ```bash
 { claude plugin marketplace add medley56/llm-tooling &&
-    claude plugin install llm-tooling@llm-tooling &&
-    claude plugin marketplace update llm-tooling &&
-    claude plugin update llm-tooling@llm-tooling; } ||
-    echo "WARNING: llm-tooling plugin did not install or update"
+    claude plugin install medley-tools@medley56 &&
+    claude plugin marketplace update medley56 &&
+    claude plugin update medley-tools@medley56; } ||
+    echo "WARNING: medley-tools plugin did not install or update"
 ```
 
 `add` and `install` are no-ops once done; `update` is what moves the plugin
 forward. The `||` keeps a tooling problem from stopping the container.
+
+### Upgrading From `llm-tooling@llm-tooling`
+
+Before 3.0.0 the marketplace and the plugin were both named `llm-tooling`. An
+existing install does not follow the rename: remove it, then install as above.
+
+```
+/plugin uninstall llm-tooling@llm-tooling
+/plugin marketplace remove llm-tooling
+```
+
+Then update anything that still uses the old names: the `extraKnownMarketplaces`
+key in a project's `.claude/settings.json` becomes `medley56`, an
+`enabledPlugins` entry or devcontainer hook becomes `medley-tools@medley56`, and
+slash commands become `/medley-tools:<skill>`.
 
 ### Upgrading From the Old Installers
 
@@ -106,7 +123,7 @@ Earlier versions of this repo shipped `install.sh`, `install-rules.sh`, and
 
 ## Usage
 
-Invoke a skill as a slash command — `/llm-tooling:commit`, `/llm-tooling:pr-create`, `/llm-tooling:pr-review`, `/llm-tooling:pr-fix` — or just describe what you want and let Claude match your request to a skill or agent description:
+Invoke a skill as a slash command — `/medley-tools:commit`, `/medley-tools:pr-create`, `/medley-tools:pr-review`, `/medley-tools:pr-fix` — or just describe what you want and let Claude match your request to a skill or agent description:
 
 ```
 Run the tests.
@@ -141,8 +158,8 @@ The repo root is the plugin: `.claude-plugin/plugin.json` picks up `skills/` and
 checkout as the marketplace:
 
 ```bash
-claude plugin marketplace add .
-claude plugin install llm-tooling@llm-tooling
+claude plugin marketplace add ./
+claude plugin install medley-tools@medley56
 ```
 
 A marketplace added from a local directory loads its plugin in place, so an edit

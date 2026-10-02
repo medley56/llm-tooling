@@ -42,6 +42,6 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # once done.
 if command -v claude >/dev/null 2>&1; then
     claude plugin marketplace add "$REPO" &&
-        claude plugin install llm-tooling@llm-tooling ||
-        echo "post-create: the llm-tooling plugin did not install; see above." >&2
+        claude plugin install medley-tools@medley56 ||
+        echo "post-create: the medley-tools plugin did not install; see above." >&2
 fi

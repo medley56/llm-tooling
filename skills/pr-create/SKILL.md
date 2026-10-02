@@ -2,14 +2,14 @@
 name: pr-create
 description: >
   Writes a reviewer-focused description for the current branch and opens the
-  pull request on GitHub. Invoked as /llm-tooling:pr-create, or when the user asks to "open
+  pull request on GitHub. Invoked as /medley-tools:pr-create, or when the user asks to "open
   a PR", "put up a PR", "create a pull request", or "write a PR description".
   Opens a draft by default, for a self-review with pr-review before colleagues
   are asked. Accepts draft status, title, base branch, labels, reviewers, and
   assignees. Uses the GitHub MCP server; falls back to the gh CLI only with the
   user's explicit approval.
 metadata:
-  author: llm-tooling
+  author: medley-tools
   version: 3.4.0
 ---
 
@@ -120,7 +120,7 @@ On approval:
 3. Apply labels, reviewers (only if explicitly requested), and assignees. A label that does not exist, or a reviewer without access, will be rejected — report which one and leave the PR open without it rather than failing the whole operation.
 4. Report the PR URL and number.
 
-On a draft, close with the self-review step, so the last round of AI-assisted review is on GitHub for colleagues to see: run `/llm-tooling:pr-review` on this PR and have it post its comments, review the draft yourself on GitHub, answer and fix all of it with `/llm-tooling:pr-fix`, then mark the PR ready for review.
+On a draft, close with the self-review step, so the last round of AI-assisted review is on GitHub for colleagues to see: run `/medley-tools:pr-review` on this PR and have it post its comments, review the draft yourself on GitHub, answer and fix all of it with `/medley-tools:pr-fix`, then mark the PR ready for review.
 
 If creation fails, print the full description in a code block so the work is not lost, and report the error verbatim.
 

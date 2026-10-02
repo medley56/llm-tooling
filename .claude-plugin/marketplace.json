@@ -1,5 +1,5 @@
 {
-  "name": "llm-tooling",
+  "name": "medley56",
   "description": "Gavin Medley's skills and sub-agents for Claude Code.",
   "owner": {
     "name": "Gavin Medley",
@@ -7,7 +7,7 @@
   },
   "plugins": [
     {
-      "name": "llm-tooling",
+      "name": "medley-tools",
       "source": "./"
     }
   ]

@@ -10,11 +10,11 @@ description: >
   implementation-reviewer agent (which owns running the tests and linters),
   and offers both to open a pull request and to archive the plan and outcome
   to a Notion database of implementation artifacts. Invoked as
-  /llm-tooling:implement-change, or when the user asks to "implement this",
+  /medley-tools:implement-change, or when the user asks to "implement this",
   "build this feature", "work this ticket", "make this change", or "plan and
   implement".
 metadata:
-  author: llm-tooling
+  author: medley-tools
   version: 1.5.0
 ---
 
@@ -146,11 +146,11 @@ Get explicit approval before committing. If they want changes, go back to step 7
 
 ## 10. Commit
 
-Use the **commit** skill (`/llm-tooling:commit`) — it decides what belongs in the commit and writes the message. Exclude the plan file.
+Use the **commit** skill (`/medley-tools:commit`) — it decides what belongs in the commit and writes the message. Exclude the plan file.
 
 ## 11. Offer the Pull Request
 
-Ask whether to open one. On yes, use the **pr-create** skill (`/llm-tooling:pr-create`), which pushes the branch and writes the description.
+Ask whether to open one. On yes, use the **pr-create** skill (`/medley-tools:pr-create`), which pushes the branch and writes the description.
 
 The description's job is to let reviewers judge whether the change meets its goal, and only this session holds the goal. Hand pr-create the why as the author's framing, **verbatim, not summarized**:
 
